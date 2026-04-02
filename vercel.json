@@ -1,0 +1,7 @@
+{
+  "buildCommand": "",
+  "outputDirectory": "firebase",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

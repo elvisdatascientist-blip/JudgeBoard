@@ -1,0 +1,1697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PresentScore — Competition Management System</title>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --primary: #1a5276;
+  --primary-light: #2980b9;
+  --accent: #e67e22;
+  --success: #27ae60;
+  --danger: #c0392b;
+  --bg: #f0f2f5;
+  --card: #ffffff;
+  --text: #2c3e50;
+  --text-light: #7f8c8d;
+  --border: #dfe6e9;
+  --gold: #f1c40f;
+  --silver: #bdc3c7;
+  --bronze: #e67e22;
+  --shadow: 0 2px 8px rgba(0,0,0,0.08);
+  --radius: 8px;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  color: white;
+  padding: 1.25rem 2rem;
+  text-align: center;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: 0.5px; }
+.header p { font-size: 0.85rem; opacity: 0.85; margin-top: 0.2rem; }
+
+/* Navigation Tabs */
+.nav-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem 1rem 0;
+  background: var(--bg);
+  flex-wrap: wrap;
+}
+.nav-tab {
+  padding: 0.6rem 1.2rem;
+  border: 2px solid var(--border);
+  border-bottom: none;
+  border-radius: var(--radius) var(--radius) 0 0;
+  background: var(--card);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-light);
+  transition: all 0.2s;
+}
+.nav-tab:hover { color: var(--primary); border-color: var(--primary-light); }
+.nav-tab.active {
+  color: var(--primary);
+  background: var(--card);
+  border-color: var(--primary);
+  box-shadow: 0 -2px 0 var(--primary) inset;
+}
+
+/* Main Content */
+.main { max-width: 1500px; margin: 0 auto; padding: 0 1rem 2rem; }
+.section { display: none; background: var(--card); border-radius: 0 0 var(--radius) var(--radius); box-shadow: var(--shadow); padding: 1.5rem; }
+.section.active { display: block; }
+.section-title { font-size: 1.2rem; font-weight: 700; color: var(--primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: var(--primary-light); }
+.btn-accent { background: var(--accent); color: white; }
+.btn-accent:hover { background: #d35400; }
+.btn-success { background: var(--success); color: white; }
+.btn-success:hover { background: #219a52; }
+.btn-danger { background: var(--danger); color: white; }
+.btn-danger:hover { background: #a93226; }
+.btn-sm { padding: 0.3rem 0.6rem; font-size: 0.78rem; }
+.btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+.btn-outline:hover { background: var(--primary); color: white; }
+
+.toolbar { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; }
+.toolbar-right { margin-left: auto; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+/* Forms */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+.form-group { display: flex; flex-direction: column; gap: 0.25rem; }
+.form-group label { font-size: 0.78rem; font-weight: 600; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; }
+.form-group input, .form-group select {
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.88rem;
+  transition: border-color 0.2s;
+}
+.form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary-light); box-shadow: 0 0 0 2px rgba(41,128,185,0.15); }
+
+/* Tables */
+.table-wrap { overflow-x: auto; margin-top: 0.5rem; }
+table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+thead th {
+  background: var(--primary);
+  color: white;
+  padding: 0.5rem 0.4rem;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+}
+thead th.sub-header { background: #2471a3; font-size: 0.7rem; }
+tbody td {
+  padding: 0.4rem 0.3rem;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+tbody tr:hover { background: #f8f9fa; }
+tbody tr:nth-child(even) { background: #fafbfc; }
+tbody tr:nth-child(even):hover { background: #f0f2f5; }
+td.name-cell { text-align: left; font-weight: 600; white-space: nowrap; }
+td.school-cell { text-align: left; white-space: nowrap; }
+
+/* Position badges */
+.psn-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: white;
+}
+.psn-1 { background: var(--gold); color: #333; }
+.psn-2 { background: var(--silver); color: #333; }
+.psn-3 { background: var(--bronze); color: white; }
+.psn-other { background: var(--text-light); }
+
+.score-high { color: var(--success); font-weight: 700; }
+.total-cell { font-weight: 700; background: #eaf2f8 !important; }
+
+/* Outlier score */
+.outlier-score {
+  color: var(--danger) !important;
+  text-decoration: line-through;
+  background: #fdecea !important;
+}
+
+/* Status badges */
+.status-badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.status-pending { background: #eee; color: #999; }
+.status-entered { background: #fff3cd; color: #856404; }
+.status-printed { background: #cce5ff; color: #004085; }
+.status-verified { background: #d4edda; color: #155724; }
+
+/* Actions column */
+td .action-btns { display: flex; gap: 0.3rem; justify-content: center; }
+
+/* Filter bar */
+.filter-bar {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  background: #f8f9fa;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+.filter-bar label { font-size: 0.8rem; font-weight: 600; color: var(--text-light); }
+.filter-bar select, .filter-bar input {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+/* Section selector radio buttons */
+.section-selector {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.section-selector label {
+  padding: 0.4rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+.section-selector input[type="radio"] { display: none; }
+.section-selector input[type="radio"]:checked + label {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: white;
+}
+
+/* Score input in data entry */
+.score-input {
+  width: 55px;
+  padding: 0.25rem 0.3rem;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  text-align: center;
+  font-size: 0.82rem;
+}
+.score-input:focus { border-color: var(--primary-light); outline: none; box-shadow: 0 0 0 2px rgba(41,128,185,0.2); }
+
+/* Modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.modal {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+.modal h3 { margin-bottom: 1rem; color: var(--primary); }
+.modal-actions { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1.2rem; }
+
+/* Settings */
+.settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+.settings-card {
+  background: #f8f9fa;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+}
+.settings-card h4 { font-size: 0.95rem; color: var(--primary); margin-bottom: 0.75rem; }
+.settings-list { list-style: none; max-height: 260px; overflow-y: auto; margin-bottom: 0.5rem; }
+.settings-list li {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--border); font-size: 0.85rem;
+}
+.settings-list li:last-child { border-bottom: none; }
+.settings-add-row { display: flex; gap: 0.4rem; }
+.settings-add-row input { flex: 1; padding: 0.4rem 0.6rem; border: 1px solid var(--border); border-radius: 4px; font-size: 0.85rem; }
+.settings-inline { display: flex; flex-direction: column; gap: 0.5rem; }
+.settings-inline .form-group { flex-direction: row; align-items: center; gap: 0.5rem; }
+.settings-inline .form-group label { min-width: 80px; margin: 0; }
+.settings-inline .form-group input { flex: 1; }
+.points-row { display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0; font-size: 0.85rem; }
+.points-row label { min-width: 40px; font-weight: 600; }
+.points-row input { width: 60px; padding: 0.3rem 0.5rem; border: 1px solid var(--border); border-radius: 4px; text-align: center; font-size: 0.85rem; }
+.settings-footer { margin-top: 1.5rem; display: flex; gap: 0.5rem; justify-content: flex-end; }
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-light);
+  font-style: italic;
+}
+
+/* Toggle switch for show/hide */
+.toggle-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+}
+.toggle-group input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
+
+/* Registration table */
+.reg-table input {
+  width: 100%;
+  padding: 0.3rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  font-size: 0.82rem;
+}
+.reg-table select {
+  width: 100%;
+  padding: 0.3rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  font-size: 0.82rem;
+}
+.reg-table td { padding: 0.3rem; }
+
+/* Print */
+@media print {
+  .header { position: static; }
+  .nav-tabs, .toolbar, .no-print, .action-btns, .filter-bar, .section-selector-wrap { display: none !important; }
+  .section { box-shadow: none; }
+  .section.print-active { display: block !important; page-break-after: always; }
+  .section:not(.print-active) { display: none !important; }
+  #tab-settings { display: none !important; }
+  #tab-registration { display: none !important; }
+  body { background: white; }
+  table { font-size: 0.72rem; }
+  thead th { background: #333 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .psn-badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .outlier-score { -webkit-print-color-adjust: exact; print-color-adjust: exact; color: #c0392b !important; background: #fdecea !important; }
+  .total-cell { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .print-title { display: block !important; text-align: center; margin-bottom: 0.5rem; }
+  .print-title h2 { font-size: 1.1rem; color: #333; }
+  .print-title p { font-size: 0.85rem; color: #666; }
+}
+.print-title { display: none; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header h1 { font-size: 1.2rem; }
+  .nav-tab { padding: 0.4rem 0.6rem; font-size: 0.75rem; }
+  .form-grid { grid-template-columns: 1fr 1fr; }
+  .section { padding: 1rem; }
+  .toolbar { flex-direction: column; align-items: stretch; }
+  .toolbar-right { margin-left: 0; }
+  .settings-grid { grid-template-columns: 1fr; }
+  .filter-bar { flex-direction: column; align-items: stretch; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1 id="app-title">PresentScore</h1>
+  <p id="app-subtitle">National Science &amp; Engineering Fair — Competition Management System</p>
+</div>
+
+<div class="nav-tabs" id="nav-tabs">
+  <button class="nav-tab active" onclick="switchTab('registration')">Registration</button>
+  <button class="nav-tab" onclick="switchTab('entry')">Data Entry</button>
+  <button class="nav-tab" onclick="switchTab('rankings')">Presenter Rankings</button>
+  <button class="nav-tab" onclick="switchTab('subcounty')">Sub-County Leaderboard</button>
+  <button class="nav-tab" onclick="switchTab('schools')">School Leaderboard</button>
+  <button class="nav-tab" onclick="switchTab('settings')">Settings</button>
+</div>
+
+<div class="main">
+
+  <!-- ========== REGISTRATION ========== -->
+  <div id="tab-registration" class="section active">
+    <div class="section-title">Registration — Import &amp; Add Entries</div>
+
+    <div class="toolbar no-print">
+      <button class="btn btn-primary" onclick="addRegRow()">+ Add Row</button>
+      <button class="btn btn-accent" onclick="document.getElementById('excel-import').click()">Import from Excel</button>
+      <input type="file" id="excel-import" accept=".xlsx,.xls,.csv" style="display:none" onchange="importExcel(event)">
+      <div class="toolbar-right">
+        <button class="btn btn-success" onclick="saveAllRegistrations()">Save All</button>
+        <button class="btn btn-danger" onclick="confirmAction('Clear all registrations?', clearRegistrations)">Clear All</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="reg-table">
+        <thead>
+          <tr>
+            <th style="width:30px">#</th>
+            <th>Sub-County</th>
+            <th>Category</th>
+            <th>Presenter 1</th>
+            <th>Presenter 2</th>
+            <th>School</th>
+            <th>Project Title</th>
+            <th style="width:60px">Prev. PSN</th>
+            <th class="no-print" style="width:40px">Del</th>
+          </tr>
+        </thead>
+        <tbody id="reg-body"></tbody>
+      </table>
+      <div id="reg-empty" class="empty-state">No entries yet. Click "+ Add Row" or "Import from Excel" to begin.</div>
+    </div>
+  </div>
+
+  <!-- ========== DATA ENTRY ========== -->
+  <div id="tab-entry" class="section">
+    <div class="section-title">Data Entry — Score Input</div>
+
+    <div class="filter-bar no-print">
+      <div>
+        <label>Category: </label>
+        <select id="entry-cat-filter" onchange="renderEntryTable()">
+          <option value="__all__">All Categories</option>
+        </select>
+      </div>
+      <div class="section-selector-wrap">
+        <label style="font-size:0.8rem;font-weight:600;color:var(--text-light);margin-right:0.5rem;">Section:</label>
+        <div class="section-selector" id="section-selector"></div>
+      </div>
+      <div class="toggle-group">
+        <input type="checkbox" id="entry-show-all-sections" onchange="renderEntryTable()">
+        <label for="entry-show-all-sections">Show all sections</label>
+      </div>
+    </div>
+
+    <div class="toolbar no-print">
+      <button class="btn btn-accent" onclick="printVerification()">Print for Verification</button>
+      <div class="toolbar-right">
+        <button class="btn btn-success" onclick="markSectionEntered()">Mark Section Entered</button>
+        <button class="btn btn-primary" onclick="markSectionVerified()">Mark Section Verified</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <div class="print-title">
+        <h2 id="entry-print-title"></h2>
+        <p id="entry-print-subtitle"></p>
+      </div>
+      <table id="entry-table">
+        <thead id="entry-thead"></thead>
+        <tbody id="entry-body"></tbody>
+      </table>
+      <div id="entry-empty" class="empty-state">No entries found. Register presenters first in the Registration tab.</div>
+    </div>
+  </div>
+
+  <!-- ========== PRESENTER RANKINGS ========== -->
+  <div id="tab-rankings" class="section">
+    <div class="section-title">Presenter Rankings</div>
+
+    <div class="filter-bar no-print">
+      <div>
+        <label>Category: </label>
+        <select id="rank-cat-filter" onchange="renderRankings()">
+          <option value="__all__">All Categories</option>
+        </select>
+      </div>
+      <div class="toggle-group">
+        <input type="checkbox" id="rank-show-sections" onchange="renderRankings()">
+        <label for="rank-show-sections">Show section breakdown (A, B, C per judge)</label>
+      </div>
+    </div>
+
+    <div class="toolbar no-print">
+      <button class="btn btn-accent" onclick="printRankings()">Print / PDF</button>
+      <button class="btn btn-primary" onclick="printAllCategoryRankings()">Print All Categories</button>
+      <div class="toolbar-right">
+        <button class="btn btn-success" onclick="exportQualifiers()">Export Qualifiers (Excel)</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <div class="print-title">
+        <h2 id="rank-print-title"></h2>
+        <p id="rank-print-subtitle"></p>
+      </div>
+      <table id="rank-table">
+        <thead id="rank-thead"></thead>
+        <tbody id="rank-body"></tbody>
+      </table>
+      <div id="rank-empty" class="empty-state">No scored entries yet. Enter scores in the Data Entry tab.</div>
+    </div>
+  </div>
+
+  <!-- ========== SUB-COUNTY LEADERBOARD ========== -->
+  <div id="tab-subcounty" class="section">
+    <div class="section-title">Sub-County Leaderboard</div>
+
+    <div class="toolbar no-print">
+      <button class="btn btn-accent" onclick="printLeaderboard('subcounty')">Print / PDF</button>
+    </div>
+
+    <div class="table-wrap">
+      <div class="print-title">
+        <h2 id="sc-print-title"></h2>
+        <p id="sc-print-subtitle"></p>
+      </div>
+      <table id="subcounty-table">
+        <thead id="sc-thead"></thead>
+        <tbody id="sc-body"></tbody>
+      </table>
+      <div id="sc-empty" class="empty-state">Leaderboard auto-generated from presenter rankings.</div>
+    </div>
+  </div>
+
+  <!-- ========== SCHOOL LEADERBOARD ========== -->
+  <div id="tab-schools" class="section">
+    <div class="section-title">School Leaderboard</div>
+
+    <div class="toolbar no-print">
+      <button class="btn btn-accent" onclick="printLeaderboard('schools')">Print / PDF</button>
+    </div>
+
+    <div class="table-wrap">
+      <div class="print-title">
+        <h2 id="sch-print-title"></h2>
+        <p id="sch-print-subtitle"></p>
+      </div>
+      <table id="school-table">
+        <thead id="sch-thead"></thead>
+        <tbody id="sch-body"></tbody>
+      </table>
+      <div id="sch-empty" class="empty-state">Leaderboard auto-generated from presenter rankings.</div>
+    </div>
+  </div>
+
+  <!-- ========== SETTINGS ========== -->
+  <div id="tab-settings" class="section">
+    <div class="section-title">Settings</div>
+
+    <div class="settings-grid">
+      <!-- Title / Subtitle -->
+      <div class="settings-card">
+        <h4>Competition Title</h4>
+        <div class="settings-inline">
+          <div class="form-group">
+            <label>Title</label>
+            <input type="text" id="set-title" placeholder="PresentScore">
+          </div>
+          <div class="form-group">
+            <label>Subtitle</label>
+            <input type="text" id="set-subtitle" placeholder="Competition subtitle">
+          </div>
+        </div>
+      </div>
+
+      <!-- Judges & Sections -->
+      <div class="settings-card">
+        <h4>Judges &amp; Sections</h4>
+        <div class="settings-inline">
+          <div class="form-group">
+            <label>Judges</label>
+            <input type="number" id="set-num-judges" min="1" max="10" value="3" style="width:60px;">
+          </div>
+          <div class="form-group">
+            <label>Outlier (&plusmn;)</label>
+            <input type="number" id="set-outlier" min="1" max="50" value="5" style="width:60px;">
+          </div>
+        </div>
+        <h4 style="margin-top:0.75rem;">Section Labels</h4>
+        <div id="set-section-labels" class="settings-inline"></div>
+        <div class="settings-add-row" style="margin-top:0.5rem;">
+          <button class="btn btn-primary btn-sm" onclick="addSectionSetting()">+ Add Section</button>
+          <button class="btn btn-danger btn-sm" onclick="removeSectionSetting()">- Remove Last</button>
+        </div>
+      </div>
+
+      <!-- Categories -->
+      <div class="settings-card">
+        <h4>Competition Categories</h4>
+        <ul class="settings-list" id="set-cat-list"></ul>
+        <div class="settings-add-row">
+          <input type="text" id="set-cat-new" placeholder="New category name" onkeydown="if(event.key==='Enter')addCategory()">
+          <button class="btn btn-primary btn-sm" onclick="addCategory()">Add</button>
+        </div>
+      </div>
+
+      <!-- Points Mapping -->
+      <div class="settings-card">
+        <h4>Points Mapping (Position &rarr; Points)</h4>
+        <div id="set-points-list"></div>
+        <div class="settings-add-row" style="margin-top:0.5rem;">
+          <button class="btn btn-primary btn-sm" onclick="addPointsTier()">+ Add Tier</button>
+          <button class="btn btn-danger btn-sm" onclick="removeLastPointsTier()">- Remove Last</button>
+        </div>
+      </div>
+
+      <!-- Qualifiers -->
+      <div class="settings-card">
+        <h4>Qualifiers</h4>
+        <div class="settings-inline">
+          <div class="form-group">
+            <label>Top N per category</label>
+            <input type="number" id="set-top-n" min="1" max="50" value="3" style="width:60px;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Management -->
+      <div class="settings-card">
+        <h4>Data Management</h4>
+        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+          <button class="btn btn-accent" onclick="exportAllData()">Export All Data (JSON)</button>
+          <button class="btn btn-primary" onclick="document.getElementById('json-import').click()">Import Data (JSON)</button>
+          <input type="file" id="json-import" accept=".json" style="display:none" onchange="importJSON(event)">
+          <button class="btn btn-danger" onclick="confirmAction('Reset ALL data and settings? This cannot be undone.', resetAll)">Reset Everything</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-footer">
+      <button class="btn btn-success" onclick="saveSettings()">Save Settings</button>
+      <button class="btn btn-danger" onclick="resetSettings()">Reset to Defaults</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal">
+    <h3 id="confirm-title">Confirm Action</h3>
+    <p id="confirm-msg">Are you sure?</p>
+    <div class="modal-actions">
+      <button class="btn btn-danger" id="confirm-yes">Yes, Proceed</button>
+      <button class="btn btn-primary" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== DEFAULTS ====================
+const DEFAULT_CATEGORIES = [
+  'MATH', 'PHY', 'COMP', 'CHEM', 'BIO & BIO.T', 'ENGY & TRAN',
+  'ENVRON', 'AGR', 'FOOD', 'ENGIN', 'TECH & APPL', 'ROBOTICS', 'BEHAV. SCI.'
+];
+const DEFAULT_SECTIONS = [
+  { key: 'A', label: 'Innovation' },
+  { key: 'B', label: 'Methodology' },
+  { key: 'C', label: 'Presentation' }
+];
+const DEFAULT_POINTS = { 1: 6, 2: 5, 3: 4, 4: 3, 5: 2, 6: 1 };
+const DEFAULT_TITLE = 'PresentScore';
+const DEFAULT_SUBTITLE = 'National Science & Engineering Fair — Competition Management System';
+
+// ==================== STATE ====================
+let CATEGORIES = [...DEFAULT_CATEGORIES];
+let SECTIONS = JSON.parse(JSON.stringify(DEFAULT_SECTIONS));
+let NUM_JUDGES = 3;
+let OUTLIER_THRESHOLD = 5;
+let POINTS_MAP = { ...DEFAULT_POINTS };
+let TOP_N = 3;
+let APP_TITLE = DEFAULT_TITLE;
+let APP_SUBTITLE = DEFAULT_SUBTITLE;
+
+let entries = []; // main data array
+let currentSection = 'A'; // for data entry tab
+
+// ==================== SETTINGS ====================
+function loadSettings() {
+  try {
+    CATEGORIES = JSON.parse(localStorage.getItem('ps_categories')) || [...DEFAULT_CATEGORIES];
+    SECTIONS = JSON.parse(localStorage.getItem('ps_sections')) || JSON.parse(JSON.stringify(DEFAULT_SECTIONS));
+    NUM_JUDGES = parseInt(localStorage.getItem('ps_num_judges')) || 3;
+    OUTLIER_THRESHOLD = parseInt(localStorage.getItem('ps_outlier')) || 5;
+    POINTS_MAP = JSON.parse(localStorage.getItem('ps_points')) || { ...DEFAULT_POINTS };
+    TOP_N = parseInt(localStorage.getItem('ps_top_n')) || 3;
+    APP_TITLE = localStorage.getItem('ps_title') || DEFAULT_TITLE;
+    APP_SUBTITLE = localStorage.getItem('ps_subtitle') || DEFAULT_SUBTITLE;
+  } catch (e) {
+    console.error('Error loading settings:', e);
+  }
+}
+
+function saveSettings() {
+  APP_TITLE = document.getElementById('set-title').value.trim() || DEFAULT_TITLE;
+  APP_SUBTITLE = document.getElementById('set-subtitle').value.trim() || DEFAULT_SUBTITLE;
+  NUM_JUDGES = parseInt(document.getElementById('set-num-judges').value) || 3;
+  OUTLIER_THRESHOLD = parseInt(document.getElementById('set-outlier').value) || 5;
+  TOP_N = parseInt(document.getElementById('set-top-n').value) || 3;
+
+  // Read section labels
+  SECTIONS = [];
+  document.querySelectorAll('#set-section-labels .form-group').forEach(fg => {
+    const key = fg.querySelector('label').textContent.trim();
+    const label = fg.querySelector('input').value.trim();
+    SECTIONS.push({ key, label: label || key });
+  });
+  if (SECTIONS.length === 0) SECTIONS = JSON.parse(JSON.stringify(DEFAULT_SECTIONS));
+
+  // Read points
+  POINTS_MAP = {};
+  document.querySelectorAll('#set-points-list .points-row').forEach((row, i) => {
+    const val = parseFloat(row.querySelector('input').value) || 0;
+    POINTS_MAP[i + 1] = val;
+  });
+
+  localStorage.setItem('ps_categories', JSON.stringify(CATEGORIES));
+  localStorage.setItem('ps_sections', JSON.stringify(SECTIONS));
+  localStorage.setItem('ps_num_judges', NUM_JUDGES);
+  localStorage.setItem('ps_outlier', OUTLIER_THRESHOLD);
+  localStorage.setItem('ps_points', JSON.stringify(POINTS_MAP));
+  localStorage.setItem('ps_top_n', TOP_N);
+  localStorage.setItem('ps_title', APP_TITLE);
+  localStorage.setItem('ps_subtitle', APP_SUBTITLE);
+
+  applyTitle();
+  buildSectionSelector();
+  populateFilters();
+  renderAll();
+  alert('Settings saved!');
+}
+
+function resetSettings() {
+  if (!confirm('Reset all settings to defaults?')) return;
+  CATEGORIES = [...DEFAULT_CATEGORIES];
+  SECTIONS = JSON.parse(JSON.stringify(DEFAULT_SECTIONS));
+  NUM_JUDGES = 3;
+  OUTLIER_THRESHOLD = 5;
+  POINTS_MAP = { ...DEFAULT_POINTS };
+  TOP_N = 3;
+  APP_TITLE = DEFAULT_TITLE;
+  APP_SUBTITLE = DEFAULT_SUBTITLE;
+  localStorage.removeItem('ps_categories');
+  localStorage.removeItem('ps_sections');
+  localStorage.removeItem('ps_num_judges');
+  localStorage.removeItem('ps_outlier');
+  localStorage.removeItem('ps_points');
+  localStorage.removeItem('ps_top_n');
+  localStorage.removeItem('ps_title');
+  localStorage.removeItem('ps_subtitle');
+  applyTitle();
+  renderSettingsUI();
+  buildSectionSelector();
+  populateFilters();
+  renderAll();
+}
+
+function applyTitle() {
+  document.getElementById('app-title').textContent = APP_TITLE;
+  document.getElementById('app-subtitle').innerHTML = APP_SUBTITLE.replace(/&/g, '&amp;');
+  document.title = APP_TITLE + ' — Competition Management System';
+}
+
+function renderSettingsUI() {
+  document.getElementById('set-title').value = APP_TITLE;
+  document.getElementById('set-subtitle').value = APP_SUBTITLE;
+  document.getElementById('set-num-judges').value = NUM_JUDGES;
+  document.getElementById('set-outlier').value = OUTLIER_THRESHOLD;
+  document.getElementById('set-top-n').value = TOP_N;
+
+  // Section labels
+  const slDiv = document.getElementById('set-section-labels');
+  slDiv.innerHTML = '';
+  SECTIONS.forEach(s => {
+    slDiv.innerHTML += `<div class="form-group"><label>${s.key}</label><input type="text" value="${s.label}" placeholder="${s.key}"></div>`;
+  });
+
+  // Categories
+  const catList = document.getElementById('set-cat-list');
+  catList.innerHTML = '';
+  CATEGORIES.forEach((c, i) => {
+    catList.innerHTML += `<li>${c} <button class="btn btn-sm btn-danger" onclick="removeCategory(${i})">x</button></li>`;
+  });
+
+  // Points
+  const ptList = document.getElementById('set-points-list');
+  ptList.innerHTML = '';
+  const sortedKeys = Object.keys(POINTS_MAP).map(Number).sort((a, b) => a - b);
+  sortedKeys.forEach(k => {
+    const ordinal = k === 1 ? '1st' : k === 2 ? '2nd' : k === 3 ? '3rd' : k + 'th';
+    ptList.innerHTML += `<div class="points-row"><label>${ordinal}</label><input type="number" value="${POINTS_MAP[k]}" min="0"></div>`;
+  });
+}
+
+function addCategory() {
+  const input = document.getElementById('set-cat-new');
+  const val = input.value.trim().toUpperCase();
+  if (!val || CATEGORIES.includes(val)) return;
+  CATEGORIES.push(val);
+  input.value = '';
+  renderSettingsUI();
+}
+
+function removeCategory(i) {
+  CATEGORIES.splice(i, 1);
+  renderSettingsUI();
+}
+
+function addPointsTier() {
+  const keys = Object.keys(POINTS_MAP).map(Number);
+  const next = keys.length > 0 ? Math.max(...keys) + 1 : 1;
+  POINTS_MAP[next] = 0;
+  renderSettingsUI();
+}
+
+function removeLastPointsTier() {
+  const keys = Object.keys(POINTS_MAP).map(Number).sort((a, b) => a - b);
+  if (keys.length > 0) {
+    delete POINTS_MAP[keys[keys.length - 1]];
+    renderSettingsUI();
+  }
+}
+
+function addSectionSetting() {
+  const keys = SECTIONS.map(s => s.key);
+  const nextChar = String.fromCharCode(65 + keys.length); // A=65
+  SECTIONS.push({ key: nextChar, label: nextChar });
+  renderSettingsUI();
+}
+
+function removeSectionSetting() {
+  if (SECTIONS.length > 1) {
+    SECTIONS.pop();
+    renderSettingsUI();
+  }
+}
+
+// ==================== DATA PERSISTENCE ====================
+function saveEntries() {
+  localStorage.setItem('ps_entries', JSON.stringify(entries));
+}
+
+function loadEntries() {
+  try {
+    entries = JSON.parse(localStorage.getItem('ps_entries')) || [];
+  } catch (e) {
+    entries = [];
+  }
+}
+
+// ==================== TAB SWITCHING ====================
+const TAB_NAMES = ['registration', 'entry', 'rankings', 'subcounty', 'schools', 'settings'];
+
+function switchTab(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  const idx = TAB_NAMES.indexOf(name);
+  if (idx >= 0) document.querySelectorAll('.nav-tab')[idx].classList.add('active');
+
+  if (name === 'entry') renderEntryTable();
+  if (name === 'rankings') renderRankings();
+  if (name === 'subcounty') renderSubcountyLeaderboard();
+  if (name === 'schools') renderSchoolLeaderboard();
+}
+
+// ==================== MODAL ====================
+function confirmAction(msg, callback) {
+  document.getElementById('confirm-msg').textContent = msg;
+  document.getElementById('confirm-modal').classList.add('active');
+  document.getElementById('confirm-yes').onclick = () => { closeModal(); callback(); };
+}
+
+function closeModal() {
+  document.getElementById('confirm-modal').classList.remove('active');
+}
+
+// ==================== REGISTRATION ====================
+function addRegRow(data) {
+  const d = data || { subcounty: '', category: '', presenter1: '', presenter2: '', school: '', projectTitle: '', previousPosition: '' };
+  const body = document.getElementById('reg-body');
+  const rowNum = body.children.length + 1;
+  const catOptions = CATEGORIES.map(c => `<option value="${c}" ${c === d.category ? 'selected' : ''}>${c}</option>`).join('');
+
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td>${rowNum}</td>
+    <td><input type="text" value="${esc(d.subcounty)}" data-field="subcounty" placeholder="Sub-County"></td>
+    <td><select data-field="category"><option value="">--</option>${catOptions}</select></td>
+    <td><input type="text" value="${esc(d.presenter1)}" data-field="presenter1" placeholder="Presenter 1"></td>
+    <td><input type="text" value="${esc(d.presenter2)}" data-field="presenter2" placeholder="Presenter 2 (optional)"></td>
+    <td><input type="text" value="${esc(d.school)}" data-field="school" placeholder="School"></td>
+    <td><input type="text" value="${esc(d.projectTitle)}" data-field="projectTitle" placeholder="Project Title"></td>
+    <td><input type="number" value="${d.previousPosition || ''}" data-field="previousPosition" min="0" style="width:50px"></td>
+    <td class="no-print"><button class="btn btn-sm btn-danger" onclick="this.closest('tr').remove();renumberRegRows()">x</button></td>
+  `;
+  body.appendChild(tr);
+  document.getElementById('reg-empty').style.display = 'none';
+}
+
+function renumberRegRows() {
+  const rows = document.querySelectorAll('#reg-body tr');
+  rows.forEach((tr, i) => { tr.children[0].textContent = i + 1; });
+  if (rows.length === 0) document.getElementById('reg-empty').style.display = '';
+}
+
+function saveAllRegistrations() {
+  const rows = document.querySelectorAll('#reg-body tr');
+  if (rows.length === 0) return alert('No rows to save.');
+
+  rows.forEach(tr => {
+    const get = field => {
+      const el = tr.querySelector(`[data-field="${field}"]`);
+      return el ? el.value.trim() : '';
+    };
+    const subcounty = get('subcounty');
+    const category = get('category');
+    const presenter1 = get('presenter1');
+    if (!presenter1) return; // skip empty rows
+
+    // Check if this entry already exists (by presenter1 + category)
+    const existing = entries.find(e => e.presenter1 === presenter1 && e.category === category);
+    if (existing) {
+      // Update existing
+      existing.subcounty = subcounty;
+      existing.presenter2 = get('presenter2');
+      existing.school = get('school');
+      existing.projectTitle = get('projectTitle');
+      existing.previousPosition = parseInt(get('previousPosition')) || 0;
+    } else {
+      // Create new entry with empty scores
+      const scores = {};
+      for (let j = 1; j <= NUM_JUDGES; j++) {
+        scores['j' + j] = {};
+        SECTIONS.forEach(s => { scores['j' + j][s.key] = null; });
+      }
+      const entryStatus = {};
+      SECTIONS.forEach(s => { entryStatus[s.key] = 'pending'; });
+
+      entries.push({
+        id: Date.now() + '-' + Math.random().toString(36).substr(2, 6),
+        subcounty,
+        category,
+        presenter1,
+        presenter2: get('presenter2'),
+        school: get('school'),
+        projectTitle: get('projectTitle'),
+        previousPosition: parseInt(get('previousPosition')) || 0,
+        scores,
+        entryStatus,
+        judgeTotals: {},
+        outlierJudge: null,
+        average: 0,
+        position: 0,
+        points: 0
+      });
+    }
+  });
+
+  saveEntries();
+  recalcAll();
+  alert(`Saved ${rows.length} entries.`);
+}
+
+function clearRegistrations() {
+  document.getElementById('reg-body').innerHTML = '';
+  document.getElementById('reg-empty').style.display = '';
+}
+
+function renderRegTable() {
+  const body = document.getElementById('reg-body');
+  body.innerHTML = '';
+  if (entries.length === 0) {
+    document.getElementById('reg-empty').style.display = '';
+    return;
+  }
+  document.getElementById('reg-empty').style.display = 'none';
+  entries.forEach(e => addRegRow(e));
+}
+
+// ==================== EXCEL IMPORT ====================
+function importExcel(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]]; // first sheet (OVERAL)
+      const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
+
+      // Find header row (look for row with "SUB-COUNTY" or "CATEGORY")
+      let headerRow = -1;
+      for (let i = 0; i < Math.min(10, data.length); i++) {
+        const row = (data[i] || []).map(c => String(c || '').toUpperCase());
+        if (row.includes('SUB-COUNTY') || row.includes('CATEGORY') || row.includes('PRESENTERS')) {
+          headerRow = i;
+          break;
+        }
+      }
+
+      // DATA.xlsx format: row 3 is headers (0-indexed: 2), row 4 is sub-headers, data starts row 5 (index 4)
+      // Columns (1-indexed in xlsx): B=SubCounty, C=Category, D=Presenter1, E=Presenter2, F=School, G=Title
+      // Then judge scores follow
+      const startRow = headerRow >= 0 ? headerRow + 2 : 4; // skip header + sub-header
+
+      let count = 0;
+      for (let i = startRow; i < data.length; i++) {
+        const row = data[i];
+        if (!row || !row[1]) continue; // skip empty rows (col B is subcounty)
+
+        const subcounty = String(row[1] || '').trim();
+        const category = String(row[2] || '').trim();
+        const presenter1 = String(row[3] || '').trim();
+        const presenter2 = String(row[4] || '').trim();
+        const school = String(row[5] || '').trim();
+        const projectTitle = String(row[6] || '').trim();
+
+        if (!presenter1) continue;
+
+        // Parse scores if present (columns 7-18 for 3 judges x 3 sections + totals)
+        const scores = {};
+        let colIdx = 7; // start after title column
+        for (let j = 1; j <= NUM_JUDGES; j++) {
+          scores['j' + j] = {};
+          SECTIONS.forEach(s => {
+            const val = row[colIdx] != null ? parseFloat(row[colIdx]) : null;
+            scores['j' + j][s.key] = isNaN(val) ? null : val;
+            colIdx++;
+          });
+          colIdx++; // skip the TOTAL column per judge
+        }
+
+        const entryStatus = {};
+        SECTIONS.forEach(s => {
+          // Check if any scores exist for this section
+          let hasScores = false;
+          for (let j = 1; j <= NUM_JUDGES; j++) {
+            if (scores['j' + j][s.key] != null) hasScores = true;
+          }
+          entryStatus[s.key] = hasScores ? 'entered' : 'pending';
+        });
+
+        // Check for previous position (PSN column, usually near end)
+        const psnColIdx = 7 + NUM_JUDGES * (SECTIONS.length + 1) + 1; // after AVG
+        const prevPsn = row[psnColIdx] != null ? parseInt(row[psnColIdx]) : 0;
+
+        entries.push({
+          id: Date.now() + '-' + Math.random().toString(36).substr(2, 6) + '-' + i,
+          subcounty,
+          category,
+          presenter1,
+          presenter2,
+          school,
+          projectTitle,
+          previousPosition: isNaN(prevPsn) ? 0 : prevPsn,
+          scores,
+          entryStatus,
+          judgeTotals: {},
+          outlierJudge: null,
+          average: 0,
+          position: 0,
+          points: 0
+        });
+        count++;
+      }
+
+      saveEntries();
+      recalcAll();
+      renderRegTable();
+      alert(`Imported ${count} entries from "${file.name}".`);
+    } catch (err) {
+      console.error(err);
+      alert('Error reading Excel file: ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+  event.target.value = '';
+}
+
+// ==================== AVERAGING ALGORITHM ====================
+function calcEntry(entry) {
+  const judgeTotals = {};
+  for (let j = 1; j <= NUM_JUDGES; j++) {
+    const key = 'j' + j;
+    let total = 0;
+    let hasAny = false;
+    SECTIONS.forEach(s => {
+      const val = entry.scores[key] && entry.scores[key][s.key];
+      if (val != null && !isNaN(val)) {
+        total += val;
+        hasAny = true;
+      }
+    });
+    judgeTotals[key] = hasAny ? total : null;
+  }
+  entry.judgeTotals = judgeTotals;
+
+  // Get non-null totals
+  const validJudges = [];
+  for (let j = 1; j <= NUM_JUDGES; j++) {
+    const key = 'j' + j;
+    if (judgeTotals[key] != null) {
+      validJudges.push({ key, total: judgeTotals[key] });
+    }
+  }
+
+  entry.outlierJudge = null;
+  entry.average = 0;
+
+  if (validJudges.length === 0) return;
+
+  if (validJudges.length <= 2 || NUM_JUDGES !== 3) {
+    // Simple average for non-3-judge setups or fewer than 3 valid
+    const sum = validJudges.reduce((a, v) => a + v.total, 0);
+    entry.average = sum / validJudges.length;
+    return;
+  }
+
+  // 3-judge outlier detection
+  const [j1, j2, j3] = validJudges;
+  const d12 = Math.abs(j1.total - j2.total);
+  const d13 = Math.abs(j1.total - j3.total);
+  const d23 = Math.abs(j2.total - j3.total);
+  const t = OUTLIER_THRESHOLD;
+
+  // J1 is outlier: J2 & J3 within threshold, J1 far from both
+  if (d23 <= t && d12 > t && d13 > t) {
+    entry.outlierJudge = j1.key;
+    entry.average = (j2.total + j3.total) / 2;
+    return;
+  }
+  // J2 is outlier: J1 & J3 within threshold, J2 far from both
+  if (d13 <= t && d12 > t && d23 > t) {
+    entry.outlierJudge = j2.key;
+    entry.average = (j1.total + j3.total) / 2;
+    return;
+  }
+  // J3 is outlier: J1 & J2 within threshold, J3 far from both
+  if (d12 <= t && d13 > t && d23 > t) {
+    entry.outlierJudge = j3.key;
+    entry.average = (j1.total + j2.total) / 2;
+    return;
+  }
+
+  // All within range OR all outside range: average all 3
+  entry.average = (j1.total + j2.total + j3.total) / 3;
+}
+
+function recalcAll() {
+  // Recalc every entry
+  entries.forEach(e => calcEntry(e));
+
+  // Assign positions & points per category
+  const byCat = {};
+  entries.forEach(e => {
+    if (!byCat[e.category]) byCat[e.category] = [];
+    byCat[e.category].push(e);
+  });
+
+  Object.values(byCat).forEach(catEntries => {
+    catEntries.sort((a, b) => b.average - a.average);
+    catEntries.forEach((e, i) => {
+      e.position = i + 1;
+      e.points = POINTS_MAP[i + 1] || 0;
+    });
+  });
+
+  saveEntries();
+}
+
+// ==================== SECTION SELECTOR ====================
+function buildSectionSelector() {
+  const div = document.getElementById('section-selector');
+  div.innerHTML = '';
+  SECTIONS.forEach((s, i) => {
+    div.innerHTML += `<input type="radio" name="sec-sel" id="sec-${s.key}" value="${s.key}" ${i === 0 ? 'checked' : ''} onchange="currentSection='${s.key}';renderEntryTable()"><label for="sec-${s.key}">${s.key} (${s.label})</label>`;
+  });
+  currentSection = SECTIONS[0]?.key || 'A';
+}
+
+function populateFilters() {
+  const catOptions = '<option value="__all__">All Categories</option>' +
+    CATEGORIES.map(c => `<option value="${c}">${c}</option>`).join('');
+  document.getElementById('entry-cat-filter').innerHTML = catOptions;
+  document.getElementById('rank-cat-filter').innerHTML = catOptions;
+}
+
+// ==================== DATA ENTRY TABLE ====================
+function renderEntryTable() {
+  const catFilter = document.getElementById('entry-cat-filter').value;
+  const showAll = document.getElementById('entry-show-all-sections').checked;
+
+  let filtered = entries;
+  if (catFilter !== '__all__') {
+    filtered = entries.filter(e => e.category === catFilter);
+  }
+
+  const thead = document.getElementById('entry-thead');
+  const tbody = document.getElementById('entry-body');
+  const empty = document.getElementById('entry-empty');
+
+  // Build header
+  let hdr1 = '<tr><th rowspan="2">#</th><th rowspan="2">Sub-County</th><th rowspan="2">Presenter(s)</th><th rowspan="2">School</th><th rowspan="2">Category</th><th rowspan="2">Project</th>';
+  let hdr2 = '<tr>';
+
+  if (showAll) {
+    for (let j = 1; j <= NUM_JUDGES; j++) {
+      hdr1 += `<th colspan="${SECTIONS.length + 1}">J${j}</th>`;
+      SECTIONS.forEach(s => { hdr2 += `<th class="sub-header">${s.key}</th>`; });
+      hdr2 += `<th class="sub-header">Total</th>`;
+    }
+  } else {
+    for (let j = 1; j <= NUM_JUDGES; j++) {
+      hdr1 += `<th>J${j}-${currentSection}</th>`;
+    }
+  }
+
+  if (showAll) {
+    hdr1 += '<th rowspan="2">AVG</th><th rowspan="2">Status</th></tr>';
+  } else {
+    hdr1 += '<th>Status</th></tr>';
+    hdr2 = ''; // no sub-header needed
+  }
+  thead.innerHTML = hdr1 + (showAll ? hdr2 + '</tr>' : '');
+
+  // Build body
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = '';
+  filtered.forEach((entry, idx) => {
+    const presenters = entry.presenter1 + (entry.presenter2 ? '<br>' + entry.presenter2 : '');
+    let row = `<td>${idx + 1}</td>`;
+    row += `<td class="name-cell">${esc(entry.subcounty)}</td>`;
+    row += `<td class="name-cell">${presenters}</td>`;
+    row += `<td class="school-cell">${esc(entry.school)}</td>`;
+    row += `<td>${esc(entry.category)}</td>`;
+    row += `<td style="text-align:left;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${esc(entry.projectTitle)}">${esc(entry.projectTitle)}</td>`;
+
+    if (showAll) {
+      for (let j = 1; j <= NUM_JUDGES; j++) {
+        const jk = 'j' + j;
+        SECTIONS.forEach(s => {
+          const val = entry.scores[jk]?.[s.key];
+          row += `<td><input class="score-input" type="number" step="0.1" min="0" value="${val != null ? val : ''}" data-id="${entry.id}" data-judge="${jk}" data-section="${s.key}" onchange="updateScore(this)"></td>`;
+        });
+        const jt = entry.judgeTotals[jk];
+        const isOutlier = entry.outlierJudge === jk;
+        row += `<td class="total-cell ${isOutlier ? 'outlier-score' : ''}">${jt != null ? jt.toFixed(1) : '-'}</td>`;
+      }
+      row += `<td class="total-cell">${entry.average ? entry.average.toFixed(1) : '-'}</td>`;
+    } else {
+      for (let j = 1; j <= NUM_JUDGES; j++) {
+        const jk = 'j' + j;
+        const val = entry.scores[jk]?.[currentSection];
+        row += `<td><input class="score-input" type="number" step="0.1" min="0" value="${val != null ? val : ''}" data-id="${entry.id}" data-judge="${jk}" data-section="${currentSection}" onchange="updateScore(this)"></td>`;
+      }
+    }
+
+    const status = entry.entryStatus?.[currentSection] || 'pending';
+    row += `<td><span class="status-badge status-${status}">${status}</span></td>`;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = row;
+    tbody.appendChild(tr);
+  });
+}
+
+function updateScore(input) {
+  const id = input.dataset.id;
+  const judge = input.dataset.judge;
+  const section = input.dataset.section;
+  const val = input.value.trim() === '' ? null : parseFloat(input.value);
+
+  const entry = entries.find(e => e.id === id);
+  if (!entry) return;
+
+  if (!entry.scores[judge]) entry.scores[judge] = {};
+  entry.scores[judge][section] = isNaN(val) ? null : val;
+
+  calcEntry(entry);
+  saveEntries();
+
+  // Update totals in the row if showing all sections
+  if (document.getElementById('entry-show-all-sections').checked) {
+    renderEntryTable();
+  }
+}
+
+function markSectionEntered() {
+  const catFilter = document.getElementById('entry-cat-filter').value;
+  entries.forEach(e => {
+    if (catFilter !== '__all__' && e.category !== catFilter) return;
+    if (e.entryStatus) e.entryStatus[currentSection] = 'entered';
+  });
+  saveEntries();
+  renderEntryTable();
+}
+
+function markSectionVerified() {
+  const catFilter = document.getElementById('entry-cat-filter').value;
+  entries.forEach(e => {
+    if (catFilter !== '__all__' && e.category !== catFilter) return;
+    if (e.entryStatus) e.entryStatus[currentSection] = 'verified';
+  });
+  saveEntries();
+  renderEntryTable();
+}
+
+// ==================== PRESENTER RANKINGS ====================
+function renderRankings() {
+  const catFilter = document.getElementById('rank-cat-filter').value;
+  const showSections = document.getElementById('rank-show-sections').checked;
+
+  recalcAll();
+
+  let filtered = entries.filter(e => e.average > 0);
+  if (catFilter !== '__all__') {
+    filtered = filtered.filter(e => e.category === catFilter);
+  }
+
+  // Sort by category then position
+  if (catFilter === '__all__') {
+    filtered.sort((a, b) => {
+      if (a.category !== b.category) return a.category.localeCompare(b.category);
+      return a.position - b.position;
+    });
+  } else {
+    filtered.sort((a, b) => a.position - b.position);
+  }
+
+  const thead = document.getElementById('rank-thead');
+  const tbody = document.getElementById('rank-body');
+  const empty = document.getElementById('rank-empty');
+
+  // Header
+  let hdr1 = '<tr><th rowspan="2">PSN</th><th rowspan="2">Sub-County</th>';
+  if (catFilter === '__all__') hdr1 += '<th rowspan="2">Category</th>';
+  hdr1 += '<th rowspan="2">Presenter(s)</th><th rowspan="2">School</th><th rowspan="2">Project</th>';
+
+  let hdr2 = '<tr>';
+
+  if (showSections) {
+    for (let j = 1; j <= NUM_JUDGES; j++) {
+      hdr1 += `<th colspan="${SECTIONS.length + 1}">J${j}</th>`;
+      SECTIONS.forEach(s => { hdr2 += `<th class="sub-header">${s.key}</th>`; });
+      hdr2 += `<th class="sub-header">Total</th>`;
+    }
+    hdr1 += '<th rowspan="2">AVG</th><th rowspan="2">PTS</th></tr>';
+    thead.innerHTML = hdr1 + hdr2 + '</tr>';
+  } else {
+    for (let j = 1; j <= NUM_JUDGES; j++) {
+      hdr1 += `<th>J${j}</th>`;
+    }
+    hdr1 += '<th>AVG</th><th>PTS</th></tr>';
+    thead.innerHTML = hdr1;
+  }
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = '';
+  let lastCat = '';
+  filtered.forEach(entry => {
+    // Category separator for "All" view
+    if (catFilter === '__all__' && entry.category !== lastCat) {
+      lastCat = entry.category;
+      const colSpan = showSections ? 6 + NUM_JUDGES * (SECTIONS.length + 1) + 2 + 1 : 6 + NUM_JUDGES + 3;
+      const sepTr = document.createElement('tr');
+      sepTr.innerHTML = `<td colspan="${colSpan}" style="background:var(--primary);color:white;font-weight:700;text-align:left;padding:0.5rem;">${esc(entry.category)}</td>`;
+      tbody.appendChild(sepTr);
+    }
+
+    const presenters = entry.presenter1 + (entry.presenter2 ? ' & ' + entry.presenter2 : '');
+    const psnClass = entry.position <= 3 ? `psn-${entry.position}` : 'psn-other';
+
+    let row = `<td><span class="psn-badge ${psnClass}">${entry.position}</span></td>`;
+    row += `<td class="name-cell">${esc(entry.subcounty)}</td>`;
+    if (catFilter === '__all__') row += `<td>${esc(entry.category)}</td>`;
+    row += `<td class="name-cell">${esc(presenters)}</td>`;
+    row += `<td class="school-cell">${esc(entry.school)}</td>`;
+    row += `<td style="text-align:left;">${esc(entry.projectTitle)}</td>`;
+
+    if (showSections) {
+      for (let j = 1; j <= NUM_JUDGES; j++) {
+        const jk = 'j' + j;
+        SECTIONS.forEach(s => {
+          const val = entry.scores[jk]?.[s.key];
+          row += `<td>${val != null ? val : '-'}</td>`;
+        });
+        const jt = entry.judgeTotals[jk];
+        const isOutlier = entry.outlierJudge === jk;
+        row += `<td class="total-cell ${isOutlier ? 'outlier-score' : ''}">${jt != null ? jt.toFixed(1) : '-'}</td>`;
+      }
+    } else {
+      for (let j = 1; j <= NUM_JUDGES; j++) {
+        const jk = 'j' + j;
+        const jt = entry.judgeTotals[jk];
+        const isOutlier = entry.outlierJudge === jk;
+        row += `<td class="${isOutlier ? 'outlier-score' : ''}">${jt != null ? jt.toFixed(1) : '-'}</td>`;
+      }
+    }
+
+    const avgClass = entry.position <= 3 ? 'score-high' : '';
+    row += `<td class="total-cell ${avgClass}">${entry.average.toFixed(1)}</td>`;
+    row += `<td>${entry.points}</td>`;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = row;
+    tbody.appendChild(tr);
+  });
+
+  // Update print title
+  document.getElementById('rank-print-title').textContent = APP_TITLE;
+  document.getElementById('rank-print-subtitle').textContent = (catFilter !== '__all__' ? catFilter + ' — ' : '') + 'Presenter Rankings';
+}
+
+// ==================== LEADERBOARDS ====================
+function computeLeaderboard(groupField) {
+  const groups = {};
+  entries.forEach(e => {
+    const name = e[groupField];
+    if (!name) return;
+    if (!groups[name]) {
+      groups[name] = { name, cats: {} };
+      CATEGORIES.forEach(c => { groups[name].cats[c] = 0; });
+    }
+    if (e.points > 0 && e.category) {
+      groups[name].cats[e.category] = (groups[name].cats[e.category] || 0) + e.points;
+    }
+  });
+
+  return Object.values(groups).map(g => {
+    g.total = Object.values(g.cats).reduce((a, b) => a + b, 0);
+    return g;
+  }).sort((a, b) => b.total - a.total);
+}
+
+function renderLeaderboardTable(theadId, tbodyId, emptyId, printTitleId, data, label) {
+  const thead = document.getElementById(theadId);
+  const tbody = document.getElementById(tbodyId);
+  const empty = document.getElementById(emptyId);
+
+  let hdr = '<tr><th>PSN</th><th>' + label + '</th>';
+  CATEGORIES.forEach(c => { hdr += `<th>${c}</th>`; });
+  hdr += '<th>TOTAL</th></tr>';
+  thead.innerHTML = hdr;
+
+  if (data.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = '';
+  data.forEach((item, i) => {
+    const psn = i + 1;
+    const psnClass = psn <= 3 ? `psn-${psn}` : 'psn-other';
+    let row = `<td><span class="psn-badge ${psnClass}">${psn}</span></td>`;
+    row += `<td class="name-cell">${esc(item.name)}</td>`;
+    CATEGORIES.forEach(c => {
+      const v = item.cats[c] || 0;
+      row += `<td>${v > 0 ? v : '-'}</td>`;
+    });
+    const totalClass = psn <= 3 ? 'total-cell score-high' : 'total-cell';
+    row += `<td class="${totalClass}">${item.total}</td>`;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = row;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById(printTitleId).textContent = APP_TITLE;
+}
+
+function renderSubcountyLeaderboard() {
+  recalcAll();
+  const data = computeLeaderboard('subcounty');
+  renderLeaderboardTable('sc-thead', 'sc-body', 'sc-empty', 'sc-print-title', data, 'Sub-County');
+  document.getElementById('sc-print-subtitle').textContent = 'Sub-County Leaderboard';
+}
+
+function renderSchoolLeaderboard() {
+  recalcAll();
+  const data = computeLeaderboard('school');
+  renderLeaderboardTable('sch-thead', 'sch-body', 'sch-empty', 'sch-print-title', data, 'School');
+  document.getElementById('sch-print-subtitle').textContent = 'School Leaderboard';
+}
+
+// ==================== PRINTING ====================
+function printVerification() {
+  const section = currentSection;
+  const sectionLabel = SECTIONS.find(s => s.key === section)?.label || section;
+  document.getElementById('entry-print-title').textContent = APP_TITLE;
+  document.getElementById('entry-print-subtitle').textContent = `Section ${section} (${sectionLabel}) — Verification Print`;
+
+  // Mark current section as printed
+  const catFilter = document.getElementById('entry-cat-filter').value;
+  entries.forEach(e => {
+    if (catFilter !== '__all__' && e.category !== catFilter) return;
+    if (e.entryStatus && e.entryStatus[section] === 'entered') {
+      e.entryStatus[section] = 'printed';
+    }
+  });
+  saveEntries();
+
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('print-active'));
+  document.getElementById('tab-entry').classList.add('print-active');
+  window.print();
+  setTimeout(() => renderEntryTable(), 500);
+}
+
+function printRankings() {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('print-active'));
+  document.getElementById('tab-rankings').classList.add('print-active');
+  window.print();
+}
+
+function printAllCategoryRankings() {
+  // Temporarily render each category
+  const select = document.getElementById('rank-cat-filter');
+  const originalVal = select.value;
+
+  // Create a temp container for all categories
+  const container = document.createElement('div');
+  container.id = 'print-all-container';
+  container.style.display = 'none';
+  document.body.appendChild(container);
+
+  CATEGORIES.forEach(cat => {
+    select.value = cat;
+    renderRankings();
+    const section = document.getElementById('tab-rankings');
+    const clone = section.cloneNode(true);
+    clone.style.display = 'block';
+    clone.classList.add('print-active');
+    container.appendChild(clone);
+  });
+
+  // Restore
+  select.value = originalVal;
+  renderRankings();
+
+  // Print
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('print-active'));
+  container.style.display = 'block';
+  container.querySelectorAll('.section').forEach(s => { s.style.display = 'block'; s.classList.add('print-active'); });
+  window.print();
+  container.remove();
+}
+
+function printLeaderboard(type) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('print-active'));
+  document.getElementById('tab-' + type).classList.add('print-active');
+  window.print();
+}
+
+// ==================== EXCEL EXPORT ====================
+function exportQualifiers() {
+  if (typeof XLSX === 'undefined') return alert('SheetJS library not loaded.');
+  recalcAll();
+
+  const wb = XLSX.utils.book_new();
+
+  CATEGORIES.forEach(cat => {
+    const catEntries = entries
+      .filter(e => e.category === cat && e.average > 0)
+      .sort((a, b) => a.position - b.position)
+      .slice(0, TOP_N);
+
+    if (catEntries.length === 0) return;
+
+    const sheetData = catEntries.map((e, i) => {
+      const row = {
+        'Position': e.position,
+        'Sub-County': e.subcounty,
+        'Presenter 1': e.presenter1,
+        'Presenter 2': e.presenter2 || '',
+        'School': e.school,
+        'Project Title': e.projectTitle,
+      };
+      for (let j = 1; j <= NUM_JUDGES; j++) {
+        const jk = 'j' + j;
+        SECTIONS.forEach(s => {
+          row[`J${j}-${s.key}`] = e.scores[jk]?.[s.key] ?? '';
+        });
+        row[`J${j} Total`] = e.judgeTotals[jk] != null ? e.judgeTotals[jk] : '';
+        if (e.outlierJudge === jk) row[`J${j} Total`] = '(' + row[`J${j} Total`] + ') OMITTED';
+      }
+      row['Average'] = parseFloat(e.average.toFixed(2));
+      row['Points'] = e.points;
+      return row;
+    });
+
+    const ws = XLSX.utils.json_to_sheet(sheetData);
+    const sheetName = cat.replace(/[\\\/\?\*\[\]]/g, '').substring(0, 31);
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  });
+
+  XLSX.writeFile(wb, `Qualifiers_Top${TOP_N}.xlsx`);
+}
+
+// ==================== JSON EXPORT / IMPORT ====================
+function exportAllData() {
+  const data = {
+    settings: { CATEGORIES, SECTIONS, NUM_JUDGES, OUTLIER_THRESHOLD, POINTS_MAP, TOP_N, APP_TITLE, APP_SUBTITLE },
+    entries
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'presentscore_backup.json';
+  a.click();
+}
+
+function importJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.settings) {
+        CATEGORIES = data.settings.CATEGORIES || CATEGORIES;
+        SECTIONS = data.settings.SECTIONS || SECTIONS;
+        NUM_JUDGES = data.settings.NUM_JUDGES || NUM_JUDGES;
+        OUTLIER_THRESHOLD = data.settings.OUTLIER_THRESHOLD || OUTLIER_THRESHOLD;
+        POINTS_MAP = data.settings.POINTS_MAP || POINTS_MAP;
+        TOP_N = data.settings.TOP_N || TOP_N;
+        APP_TITLE = data.settings.APP_TITLE || APP_TITLE;
+        APP_SUBTITLE = data.settings.APP_SUBTITLE || APP_SUBTITLE;
+        saveSettings();
+      }
+      if (data.entries) {
+        entries = data.entries;
+        saveEntries();
+      }
+      recalcAll();
+      renderAll();
+      alert('Data imported successfully!');
+    } catch (err) {
+      alert('Error importing JSON: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function resetAll() {
+  localStorage.clear();
+  entries = [];
+  loadSettings();
+  renderAll();
+  alert('All data cleared.');
+}
+
+// ==================== UTILITY ====================
+function esc(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function renderAll() {
+  applyTitle();
+  renderSettingsUI();
+  buildSectionSelector();
+  populateFilters();
+  renderRegTable();
+}
+
+// ==================== INIT ====================
+function init() {
+  loadSettings();
+  loadEntries();
+  recalcAll();
+  renderAll();
+}
+
+init();
+</script>
+
+</body>
+</html>

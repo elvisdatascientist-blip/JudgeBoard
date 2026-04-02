@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PresentScore — Demo</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --primary: #1a5276;
+  --primary-light: #2980b9;
+  --accent: #e67e22;
+  --success: #27ae60;
+  --danger: #c0392b;
+  --bg: #f0f2f5;
+  --card: #ffffff;
+  --text: #2c3e50;
+  --text-light: #7f8c8d;
+  --border: #dfe6e9;
+  --gold: #f1c40f;
+  --silver: #bdc3c7;
+  --bronze: #e67e22;
+  --shadow: 0 2px 8px rgba(0,0,0,0.08);
+  --radius: 8px;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  color: white;
+  padding: 1.25rem 2rem;
+  text-align: center;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: 0.5px; }
+.header p { font-size: 0.85rem; opacity: 0.85; margin-top: 0.2rem; }
+
+/* Navigation Tabs */
+.nav-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem 1rem 0;
+  background: var(--bg);
+  flex-wrap: wrap;
+}
+.nav-tab {
+  padding: 0.6rem 1.5rem;
+  border: 2px solid var(--border);
+  border-bottom: none;
+  border-radius: var(--radius) var(--radius) 0 0;
+  background: var(--card);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-light);
+  transition: all 0.2s;
+}
+.nav-tab:hover { color: var(--primary); border-color: var(--primary-light); }
+.nav-tab.active {
+  color: var(--primary);
+  background: var(--card);
+  border-color: var(--primary);
+  box-shadow: 0 -2px 0 var(--primary) inset;
+}
+
+/* Main Content */
+.main { max-width: 1400px; margin: 0 auto; padding: 0 1rem 2rem; }
+.section { display: none; background: var(--card); border-radius: 0 0 var(--radius) var(--radius); box-shadow: var(--shadow); padding: 1.5rem; }
+.section.active { display: block; }
+.section-title { font-size: 1.2rem; font-weight: 700; color: var(--primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: var(--primary-light); }
+.btn-accent { background: var(--accent); color: white; }
+.btn-accent:hover { background: #d35400; }
+.btn-success { background: var(--success); color: white; }
+.btn-success:hover { background: #219a52; }
+.btn-danger { background: var(--danger); color: white; }
+.btn-danger:hover { background: #a93226; }
+.btn-sm { padding: 0.3rem 0.6rem; font-size: 0.78rem; }
+
+.toolbar { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; }
+.toolbar-right { margin-left: auto; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+/* Tables */
+.table-wrap { overflow-x: auto; margin-top: 0.5rem; }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead th {
+  background: var(--primary);
+  color: white;
+  padding: 0.6rem 0.5rem;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+}
+tbody td {
+  padding: 0.5rem;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+tbody tr:hover { background: #f8f9fa; }
+tbody tr:nth-child(even) { background: #fafbfc; }
+tbody tr:nth-child(even):hover { background: #f0f2f5; }
+td.name-cell { text-align: left; font-weight: 600; white-space: nowrap; }
+td.school-cell { text-align: left; white-space: nowrap; }
+
+/* Position badges */
+.psn-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: white;
+}
+.psn-1 { background: var(--gold); color: #333; }
+.psn-2 { background: var(--silver); color: #333; }
+.psn-3 { background: var(--bronze); color: white; }
+.psn-other { background: var(--text-light); }
+
+.score-high { color: var(--success); font-weight: 700; }
+.total-cell { font-weight: 700; background: #eaf2f8 !important; }
+
+/* Actions column */
+td .action-btns { display: flex; gap: 0.3rem; justify-content: center; }
+
+/* Settings */
+.settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+@media (max-width: 768px) { .settings-grid { grid-template-columns: 1fr; } }
+.settings-card {
+  background: #f8f9fa;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+}
+.settings-card h4 { font-size: 0.95rem; color: var(--primary); margin-bottom: 0.75rem; }
+.settings-list { list-style: none; max-height: 260px; overflow-y: auto; margin-bottom: 0.5rem; }
+.settings-list li {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--border); font-size: 0.85rem;
+}
+.settings-list li:last-child { border-bottom: none; }
+.settings-add-row { display: flex; gap: 0.4rem; }
+.settings-add-row input { flex: 1; padding: 0.4rem 0.6rem; border: 1px solid var(--border); border-radius: 4px; font-size: 0.85rem; }
+.settings-inline { display: flex; flex-direction: column; gap: 0.5rem; }
+.settings-inline .form-group { display: flex; flex-direction: row; align-items: center; gap: 0.5rem; }
+.settings-inline .form-group label { min-width: 80px; margin: 0; font-size: 0.78rem; font-weight: 600; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; }
+.settings-inline .form-group input { flex: 1; padding: 0.45rem 0.6rem; border: 1px solid var(--border); border-radius: 4px; font-size: 0.88rem; }
+.points-row { display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0; font-size: 0.85rem; }
+.points-row label { min-width: 40px; font-weight: 600; }
+.points-row input { width: 60px; padding: 0.3rem 0.5rem; border: 1px solid var(--border); border-radius: 4px; text-align: center; font-size: 0.85rem; }
+.settings-footer { margin-top: 1.5rem; display: flex; gap: 0.5rem; justify-content: flex-end; }
+
+/* Form */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+.form-group { display: flex; flex-direction: column; gap: 0.25rem; }
+.form-group label { font-size: 0.78rem; font-weight: 600; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; }
+.form-group input, .form-group select {
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.88rem;
+}
+.judge-section { margin-bottom: 0.75rem; }
+.judge-header { font-weight: 700; font-size: 0.85rem; color: var(--primary); margin-bottom: 0.4rem; padding: 0.3rem 0.6rem; background: #eaf2f8; border-radius: 4px; display: inline-block; }
+.judge-scores { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: end; }
+.judge-scores .form-group { min-width: 80px; flex: 1; }
+.judge-total { font-weight: 700; color: var(--primary); font-size: 0.95rem; padding: 0.45rem 0.6rem; background: #eaf2f8; border-radius: 4px; min-width: 60px; text-align: center; align-self: end; }
+
+/* Print */
+@media print {
+  .header { position: static; }
+  .nav-tabs, .toolbar, .no-print, .action-btns { display: none !important; }
+  .section { display: block !important; page-break-after: always; box-shadow: none; }
+  #tab-settings { display: none !important; }
+  body { background: white; }
+  table { font-size: 0.75rem; }
+  thead th { background: #333 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .psn-badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header h1 { font-size: 1.2rem; }
+  .nav-tab { padding: 0.5rem 0.8rem; font-size: 0.8rem; }
+  .form-grid { grid-template-columns: 1fr 1fr; }
+  .section { padding: 1rem; }
+  .toolbar { flex-direction: column; align-items: stretch; }
+  .toolbar-right { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>PresentScore</h1>
+  <p>National Science &amp; Engineering Fair — Competition Management System</p>
+</div>
+
+<div class="nav-tabs">
+  <button class="nav-tab active" onclick="switchTab('presenters')">Presenter Scoring</button>
+  <button class="nav-tab" onclick="switchTab('subcounty')">Sub-County Leaderboard</button>
+  <button class="nav-tab" onclick="switchTab('schools')">School Leaderboard</button>
+  <button class="nav-tab" onclick="switchTab('settings')">Settings</button>
+</div>
+
+<div class="main">
+
+  <!-- ========== PRESENTER SCORING ========== -->
+  <div id="tab-presenters" class="section active">
+    <div class="section-title">Presenter Scoring &amp; Rankings</div>
+
+    <div class="toolbar no-print">
+      <button class="btn btn-primary">+ Add Presenter</button>
+      <div class="toolbar-right">
+        <button class="btn btn-accent">Print / PDF</button>
+        <button class="btn btn-danger">Clear All</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>PSN</th>
+            <th>Name</th>
+            <th>School</th>
+            <th>Sub-County</th>
+            <th>Category</th>
+            <th>Project</th>
+            <th>J1</th>
+            <th>J2</th>
+            <th>J3</th>
+            <th>AVG</th>
+            <th>PTS</th>
+            <th class="no-print">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="psn-badge psn-1">1</span></td>
+            <td class="name-cell">Amina Ochieng</td>
+            <td class="school-cell">Kegonga Secondary</td>
+            <td>Mabera</td>
+            <td>COMP</td>
+            <td>Smart Irrigation System</td>
+            <td>88.5</td>
+            <td>91.0</td>
+            <td>87.0</td>
+            <td class="total-cell score-high">88.8</td>
+            <td>6</td>
+            <td class="no-print"><div class="action-btns"><button class="btn btn-sm btn-primary">Edit</button><button class="btn btn-sm btn-danger">Del</button></div></td>
+          </tr>
+          <tr>
+            <td><span class="psn-badge psn-2">2</span></td>
+            <td class="name-cell">Brian Mwangi</td>
+            <td class="school-cell">Nyamira Boys</td>
+            <td>Nyamira North</td>
+            <td>ENGIN</td>
+            <td>Solar Water Purifier</td>
+            <td>85.0</td>
+            <td>88.5</td>
+            <td>84.0</td>
+            <td class="total-cell score-high">85.8</td>
+            <td>5</td>
+            <td class="no-print"><div class="action-btns"><button class="btn btn-sm btn-primary">Edit</button><button class="btn btn-sm btn-danger">Del</button></div></td>
+          </tr>
+          <tr>
+            <td><span class="psn-badge psn-3">3</span></td>
+            <td class="name-cell">Catherine Nyaboke</td>
+            <td class="school-cell">Keroka Girls</td>
+            <td>Manga</td>
+            <td>BIO &amp; BIO.T</td>
+            <td>Biogas from Kitchen Waste</td>
+            <td>82.0</td>
+            <td>84.0</td>
+            <td>86.5</td>
+            <td class="total-cell">84.2</td>
+            <td>4</td>
+            <td class="no-print"><div class="action-btns"><button class="btn btn-sm btn-primary">Edit</button><button class="btn btn-sm btn-danger">Del</button></div></td>
+          </tr>
+          <tr>
+            <td><span class="psn-badge psn-other">4</span></td>
+            <td class="name-cell">Daniel Otieno</td>
+            <td class="school-cell">Masaba South Sec</td>
+            <td>Masaba South</td>
+            <td>CHEM</td>
+            <td>Water Quality Testing Kit</td>
+            <td>79.5</td>
+            <td>81.0</td>
+            <td>80.0</td>
+            <td class="total-cell">80.2</td>
+            <td>3</td>
+            <td class="no-print"><div class="action-btns"><button class="btn btn-sm btn-primary">Edit</button><button class="btn btn-sm btn-danger">Del</button></div></td>
+          </tr>
+          <tr>
+            <td><span class="psn-badge psn-other">5</span></td>
+            <td class="name-cell">Esther Kemunto</td>
+            <td class="school-cell">Kegonga Secondary</td>
+            <td>Mabera</td>
+            <td>MATH</td>
+            <td>Geometry Visualization App</td>
+            <td>76.0</td>
+            <td>78.5</td>
+            <td>77.0</td>
+            <td class="total-cell">77.2</td>
+            <td>2</td>
+            <td class="no-print"><div class="action-btns"><button class="btn btn-sm btn-primary">Edit</button><button class="btn btn-sm btn-danger">Del</button></div></td>
+          </tr>
+          <tr>
+            <td><span class="psn-badge psn-other">6</span></td>
+            <td class="name-cell">Felix Onyancha</td>
+            <td class="school-cell">Nyamira Boys</td>
+            <td>Nyamira North</td>
+            <td>PHY</td>
+            <td>Wind Turbine Model</td>
+            <td>73.0</td>
+            <td>75.5</td>
+            <td>74.0</td>
+            <td class="total-cell">74.2</td>
+            <td>1</td>
+            <td class="no-print"><div class="action-btns"><button class="btn btn-sm btn-primary">Edit</button><button class="btn btn-sm btn-danger">Del</button></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ========== SUB-COUNTY LEADERBOARD ========== -->
+  <div id="tab-subcounty" class="section">
+    <div class="section-title">Sub-County Leaderboard</div>
+
+    <div class="toolbar no-print">
+      <button class="btn btn-primary">+ Add Sub-County</button>
+      <div class="toolbar-right">
+        <button class="btn btn-accent">Print / PDF</button>
+        <button class="btn btn-danger">Clear All</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>PSN</th>
+            <th>Sub-County</th>
+            <th>MATH</th>
+            <th>PHY</th>
+            <th>COMP</th>
+            <th>CHEM</th>
+            <th>BIO</th>
+            <th>ENGIN</th>
+            <th>TOTAL</th>
+            <th class="no-print">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="psn-badge psn-1">1</span></td>
+            <td class="name-cell">Mabera</td>
+            <td>6</td>
+            <td>4</td>
+            <td>6</td>
+            <td>5</td>
+            <td>3</td>
+            <td>5</td>
+            <td class="total-cell score-high">29</td>
+            <td class="no-print"><div class="action-btns"><button class="btn btn-sm btn-primary">Edit</button><button class="btn btn-sm btn-danger">Del</button></div></td>
+          </tr>
+          <tr>
+            <td><span class="psn-badge psn-2">2</span></td>
+            <td class="name-cell">Nyamira North</td>
+            <td>5</td>
+            <td>6</td>
+            <td>4</td>
+            <td>4</td>
+            <td>5</td>
+            <td>3</td>
+            <td class="total-cell score-high">27</td>
+            <td class="no-print"><div class="action-btns"><button class="btn btn-sm btn-primary">Edit</button><button class="btn btn-sm btn-danger">Del</button></div></td>
+          </tr>
+          <tr>
+            <td><span class="psn-badge psn-3">3</span></td>
+            <td class="name-cell">Manga</td>
+            <td>4</td>
+            <td>5</td>
+            <td>3</td>
+            <td>6</td>
+            <td>6</td>
+            <td>2</td>
+            <td class="total-cell">26</td>
+            <td class="no-print"><div class="action-btns"><button class="btn btn-sm btn-primary">Edit</button><button class="btn btn-sm btn-danger">Del</button></div></td>
+          </tr>
+          <tr>
+            <td><span class="psn-badge psn-other">4</span></td>
+            <td class="name-cell">Masaba South</td>
+            <td>3</td>
+            <td>3</td>
+            <td>5</td>
+            <td>3</td>
+            <td>4</td>
+            <td>6</td>
+            <td class="total-cell">24</td>
+            <td class="no-print"><div class="action-btns"><button class="btn btn-sm btn-primary">Edit</button><button class="btn btn-sm btn-danger">Del</button></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ========== SCHOOL LEADERBOARD ========== -->
+  <div id="tab-schools" class="section">
+    <div class="section-title">School Leaderboard</div>
+
+    <div class="toolbar no-print">
+      <button class="btn btn-primary">+ Add School</button>
+      <div class="toolbar-right">
+        <button class="btn btn-accent">Print / PDF</button>
+        <button class="btn btn-danger">Clear All</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>PSN</th>
+            <th>School</th>
+            <th>MATH</th>
+            <th>PHY</th>
+            <th>COMP</th>
+            <th>CHEM</th>
+            <th>BIO</th>
+            <th>ENGIN</th>
+            <th>TOTAL</th>
+            <th class="no-print">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="psn-badge psn-1">1</span></td>
+            <td class="name-cell">Kegonga Secondary</td>
+            <td>6</td>
+            <td>5</td>
+            <td>6</td>
+            <td>4</td>
+            <td>5</td>
+            <td>4</td>
+            <td class="total-cell score-high">30</td>
+            <td class="no-print"><div class="action-btns"><button class="btn btn-sm btn-primary">Edit</button><button class="btn btn-sm btn-danger">Del</button></div></td>
+          </tr>
+          <tr>
+            <td><span class="psn-badge psn-2">2</span></td>
+            <td class="name-cell">Nyamira Boys</td>
+            <td>5</td>
+            <td>6</td>
+            <td>5</td>
+            <td>3</td>
+            <td>4</td>
+            <td>5</td>
+            <td class="total-cell score-high">28</td>
+            <td class="no-print"><div class="action-btns"><button class="btn btn-sm btn-primary">Edit</button><button class="btn btn-sm btn-danger">Del</button></div></td>
+          </tr>
+          <tr>
+            <td><span class="psn-badge psn-3">3</span></td>
+            <td class="name-cell">Keroka Girls</td>
+            <td>4</td>
+            <td>4</td>
+            <td>4</td>
+            <td>6</td>
+            <td>6</td>
+            <td>3</td>
+            <td class="total-cell">27</td>
+            <td class="no-print"><div class="action-btns"><button class="btn btn-sm btn-primary">Edit</button><button class="btn btn-sm btn-danger">Del</button></div></td>
+          </tr>
+          <tr>
+            <td><span class="psn-badge psn-other">4</span></td>
+            <td class="name-cell">Masaba South Sec</td>
+            <td>3</td>
+            <td>3</td>
+            <td>3</td>
+            <td>5</td>
+            <td>3</td>
+            <td>6</td>
+            <td class="total-cell">23</td>
+            <td class="no-print"><div class="action-btns"><button class="btn btn-sm btn-primary">Edit</button><button class="btn btn-sm btn-danger">Del</button></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ========== SETTINGS ========== -->
+  <div id="tab-settings" class="section">
+    <div class="section-title">Settings</div>
+
+    <div class="settings-grid">
+      <div class="settings-card">
+        <h4>Competition Title</h4>
+        <div class="settings-inline">
+          <div class="form-group">
+            <label>Title</label>
+            <input type="text" value="PresentScore">
+          </div>
+          <div class="form-group">
+            <label>Subtitle</label>
+            <input type="text" value="National Science & Engineering Fair">
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <h4>Scoring Criteria Labels</h4>
+        <div class="settings-inline">
+          <div class="form-group">
+            <label>A</label>
+            <input type="text" value="Innovation">
+          </div>
+          <div class="form-group">
+            <label>B</label>
+            <input type="text" value="Methodology">
+          </div>
+          <div class="form-group">
+            <label>C</label>
+            <input type="text" value="Presentation">
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <h4>Competition Categories</h4>
+        <ul class="settings-list">
+          <li>MATH <button class="btn btn-sm btn-danger">x</button></li>
+          <li>PHY <button class="btn btn-sm btn-danger">x</button></li>
+          <li>COMP <button class="btn btn-sm btn-danger">x</button></li>
+          <li>CHEM <button class="btn btn-sm btn-danger">x</button></li>
+          <li>BIO &amp; BIO.T <button class="btn btn-sm btn-danger">x</button></li>
+          <li>ENGY &amp; TRAN <button class="btn btn-sm btn-danger">x</button></li>
+          <li>ENVRON <button class="btn btn-sm btn-danger">x</button></li>
+          <li>AGR <button class="btn btn-sm btn-danger">x</button></li>
+          <li>FOOD <button class="btn btn-sm btn-danger">x</button></li>
+          <li>ENGIN <button class="btn btn-sm btn-danger">x</button></li>
+          <li>TECH &amp; APPL <button class="btn btn-sm btn-danger">x</button></li>
+          <li>ROBOTICS <button class="btn btn-sm btn-danger">x</button></li>
+          <li>BEHAV. SCI. <button class="btn btn-sm btn-danger">x</button></li>
+        </ul>
+        <div class="settings-add-row">
+          <input type="text" placeholder="New category name">
+          <button class="btn btn-primary btn-sm">Add</button>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <h4>Points Mapping (Position &rarr; Points)</h4>
+        <div class="points-row"><label>1st</label><input type="number" value="6"></div>
+        <div class="points-row"><label>2nd</label><input type="number" value="5"></div>
+        <div class="points-row"><label>3rd</label><input type="number" value="4"></div>
+        <div class="points-row"><label>4th</label><input type="number" value="3"></div>
+        <div class="points-row"><label>5th</label><input type="number" value="2"></div>
+        <div class="points-row"><label>6th</label><input type="number" value="1"></div>
+        <div class="settings-add-row" style="margin-top:0.5rem;">
+          <button class="btn btn-primary btn-sm">+ Add Tier</button>
+          <button class="btn btn-danger btn-sm">- Remove Last</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-footer">
+      <button class="btn btn-success">Save Settings</button>
+      <button class="btn btn-danger">Reset to Defaults</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Simple tab switching - only JS needed for the demo -->
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  const tabs = ['presenters', 'subcounty', 'schools', 'settings'];
+  document.querySelectorAll('.nav-tab')[tabs.indexOf(name)].classList.add('active');
+}
+</script>
+
+</body>
+</html>
