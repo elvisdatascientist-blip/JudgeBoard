@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PresentScore — Competition Management System</title>
+<title>KSEF ANALYSIS — Kenya Science & Engineering Fair</title>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 <!-- Firebase SDK (compat for inline scripts) -->
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -13,19 +13,20 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --primary: #1a5276;
-  --primary-light: #2980b9;
-  --accent: #e67e22;
+  --primary: #003B73;
+  --primary-light: #00529B;
+  --accent: #F58220;
+  --accent-dark: #D96E0A;
   --success: #27ae60;
   --danger: #c0392b;
-  --bg: #f0f2f5;
+  --bg: #f4f6f8;
   --card: #ffffff;
-  --text: #2c3e50;
-  --text-light: #7f8c8d;
+  --text: #1a1a1a;
+  --text-light: #5a6270;
   --border: #dfe6e9;
-  --gold: #f1c40f;
-  --silver: #bdc3c7;
-  --bronze: #e67e22;
+  --gold: #F58220;
+  --silver: #94a3b8;
+  --bronze: #003B73;
   --shadow: 0 2px 8px rgba(0,0,0,0.08);
   --radius: 8px;
 }
@@ -38,19 +39,19 @@ body {
   min-height: 100vh;
 }
 
-/* Header */
+/* ==================== HEADER ==================== */
 .header {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 50%, var(--accent) 100%);
   color: white;
-  padding: 1.25rem 2rem;
+  padding: 1rem 2rem;
   text-align: center;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.2);
   position: sticky;
   top: 0;
   z-index: 100;
 }
-.header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: 0.5px; }
-.header p { font-size: 0.85rem; opacity: 0.85; margin-top: 0.2rem; }
+.header h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+.header p { font-size: 0.8rem; opacity: 0.9; margin-top: 0.15rem; }
 
 /* Sync indicator */
 .sync-indicator {
@@ -62,16 +63,13 @@ body {
   padding: 0.2rem 0.6rem;
   border-radius: 12px;
   position: absolute;
-  top: 0.6rem;
+  top: 0.5rem;
   right: 1rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 .sync-indicator .dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  display: inline-block;
+  width: 8px; height: 8px; border-radius: 50%; display: inline-block;
 }
 .sync-connecting { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.8); }
 .sync-connecting .dot { background: #f39c12; animation: pulse 1.2s infinite; }
@@ -81,42 +79,146 @@ body {
 .sync-offline .dot { background: #e74c3c; }
 @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-/* Navigation Tabs */
+/* ==================== NAVIGATION ==================== */
 .nav-tabs {
   display: flex;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 1rem 1rem 0;
+  gap: 0.35rem;
+  padding: 0.75rem 0.75rem 0;
   background: var(--bg);
   flex-wrap: wrap;
 }
 .nav-tab {
-  padding: 0.6rem 1.2rem;
+  padding: 0.5rem 0.9rem;
   border: 2px solid var(--border);
   border-bottom: none;
   border-radius: var(--radius) var(--radius) 0 0;
   background: var(--card);
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   font-weight: 600;
   color: var(--text-light);
   transition: all 0.2s;
+  white-space: nowrap;
 }
-.nav-tab:hover { color: var(--primary); border-color: var(--primary-light); }
+.nav-tab:hover { color: var(--primary); border-color: var(--accent); }
 .nav-tab.active {
-  color: var(--primary);
-  background: var(--card);
+  color: white;
+  background: var(--primary);
   border-color: var(--primary);
-  box-shadow: 0 -2px 0 var(--primary) inset;
 }
+.nav-tab.home-tab {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  font-weight: 700;
+}
+.nav-tab.home-tab:hover { background: var(--accent-dark); }
 
-/* Main Content */
+/* ==================== MAIN CONTENT ==================== */
 .main { max-width: 1500px; margin: 0 auto; padding: 0 1rem 2rem; }
 .section { display: none; background: var(--card); border-radius: 0 0 var(--radius) var(--radius); box-shadow: var(--shadow); padding: 1.5rem; }
 .section.active { display: block; }
-.section-title { font-size: 1.2rem; font-weight: 700; color: var(--primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+.section-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-left: 4px solid var(--accent);
+  padding-left: 0.75rem;
+}
 
-/* Buttons */
+/* ==================== LANDING PAGE ==================== */
+.landing-page {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 2rem 1.5rem;
+  text-align: center;
+}
+.landing-hero {
+  margin-bottom: 2.5rem;
+}
+.landing-hero h2 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 0.25rem;
+}
+.landing-hero .accent-bar {
+  width: 80px;
+  height: 4px;
+  background: var(--accent);
+  margin: 0.5rem auto 0.75rem;
+  border-radius: 2px;
+}
+.landing-hero p {
+  font-size: 1rem;
+  color: var(--text-light);
+  max-width: 500px;
+  margin: 0 auto;
+}
+.landing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.25rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.landing-card {
+  background: #f8f9fa;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem 1rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-align: center;
+}
+.landing-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,59,115,0.12);
+}
+.landing-card .card-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+.landing-card h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 0.3rem;
+}
+.landing-card p {
+  font-size: 0.78rem;
+  color: var(--text-light);
+  line-height: 1.4;
+}
+.landing-card.card-blue { border-left: 4px solid var(--primary); }
+.landing-card.card-orange { border-left: 4px solid var(--accent); }
+.landing-card.card-dark { border-left: 4px solid #1a1a1a; }
+.landing-section-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-light);
+  margin: 1.5rem 0 0.75rem;
+  text-align: left;
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.3rem;
+}
+
+/* ==================== BUTTONS ==================== */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -133,7 +235,7 @@ body {
 .btn-primary { background: var(--primary); color: white; }
 .btn-primary:hover { background: var(--primary-light); }
 .btn-accent { background: var(--accent); color: white; }
-.btn-accent:hover { background: #d35400; }
+.btn-accent:hover { background: var(--accent-dark); }
 .btn-success { background: var(--success); color: white; }
 .btn-success:hover { background: #219a52; }
 .btn-danger { background: var(--danger); color: white; }
@@ -145,7 +247,7 @@ body {
 .toolbar { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; }
 .toolbar-right { margin-left: auto; display: flex; gap: 0.5rem; flex-wrap: wrap; }
 
-/* Forms */
+/* ==================== FORMS ==================== */
 .form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -165,9 +267,9 @@ body {
   font-size: 0.88rem;
   transition: border-color 0.2s;
 }
-.form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary-light); box-shadow: 0 0 0 2px rgba(41,128,185,0.15); }
+.form-group input:focus, .form-group select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(245,130,32,0.15); }
 
-/* Tables */
+/* ==================== TABLES ==================== */
 .table-wrap { overflow-x: auto; margin-top: 0.5rem; }
 table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
 thead th {
@@ -181,15 +283,15 @@ thead th {
   position: sticky;
   top: 0;
 }
-thead th.sub-header { background: #2471a3; font-size: 0.7rem; }
+thead th.sub-header { background: var(--primary-light); font-size: 0.7rem; }
 tbody td {
   padding: 0.4rem 0.3rem;
   text-align: center;
   border-bottom: 1px solid var(--border);
 }
-tbody tr:hover { background: #f8f9fa; }
+tbody tr:hover { background: #fff8f0; }
 tbody tr:nth-child(even) { background: #fafbfc; }
-tbody tr:nth-child(even):hover { background: #f0f2f5; }
+tbody tr:nth-child(even):hover { background: #fff8f0; }
 td.name-cell { text-align: left; font-weight: 600; white-space: nowrap; }
 td.school-cell { text-align: left; white-space: nowrap; }
 
@@ -204,13 +306,13 @@ td.school-cell { text-align: left; white-space: nowrap; }
   font-size: 0.75rem;
   color: white;
 }
-.psn-1 { background: var(--gold); color: #333; }
-.psn-2 { background: var(--silver); color: #333; }
+.psn-1 { background: var(--gold); color: white; }
+.psn-2 { background: var(--silver); color: white; }
 .psn-3 { background: var(--bronze); color: white; }
 .psn-other { background: var(--text-light); }
 
-.score-high { color: var(--success); font-weight: 700; }
-.total-cell { font-weight: 700; background: #eaf2f8 !important; }
+.score-high { color: var(--accent); font-weight: 700; }
+.total-cell { font-weight: 700; background: #edf3f8 !important; }
 
 /* Outlier score */
 .outlier-score {
@@ -233,7 +335,6 @@ td.school-cell { text-align: left; white-space: nowrap; }
 .status-printed { background: #cce5ff; color: #004085; }
 .status-verified { background: #d4edda; color: #155724; }
 
-/* Actions column */
 td .action-btns { display: flex; gap: 0.3rem; justify-content: center; }
 
 /* Filter bar */
@@ -256,12 +357,8 @@ td .action-btns { display: flex; gap: 0.3rem; justify-content: center; }
   font-size: 0.85rem;
 }
 
-/* Section selector radio buttons */
-.section-selector {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-}
+/* Section selector */
+.section-selector { display: flex; gap: 0.5rem; align-items: center; }
 .section-selector label {
   padding: 0.4rem 1rem;
   border: 2px solid var(--border);
@@ -273,12 +370,12 @@ td .action-btns { display: flex; gap: 0.3rem; justify-content: center; }
 }
 .section-selector input[type="radio"] { display: none; }
 .section-selector input[type="radio"]:checked + label {
-  border-color: var(--primary);
-  background: var(--primary);
+  border-color: var(--accent);
+  background: var(--accent);
   color: white;
 }
 
-/* Score input in data entry */
+/* Score input */
 .score-input {
   width: 55px;
   padding: 0.25rem 0.3rem;
@@ -287,7 +384,7 @@ td .action-btns { display: flex; gap: 0.3rem; justify-content: center; }
   text-align: center;
   font-size: 0.82rem;
 }
-.score-input:focus { border-color: var(--primary-light); outline: none; box-shadow: 0 0 0 2px rgba(41,128,185,0.2); }
+.score-input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 2px rgba(245,130,32,0.2); }
 
 /* Modal */
 .modal-overlay {
@@ -338,36 +435,18 @@ td .action-btns { display: flex; gap: 0.3rem; justify-content: center; }
 .settings-footer { margin-top: 1.5rem; display: flex; gap: 0.5rem; justify-content: flex-end; }
 
 /* Empty state */
-.empty-state {
-  text-align: center;
-  padding: 2rem;
-  color: var(--text-light);
-  font-style: italic;
-}
+.empty-state { text-align: center; padding: 2rem; color: var(--text-light); font-style: italic; }
 
-/* Toggle switch for show/hide */
-.toggle-group {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.82rem;
-}
+/* Toggle */
+.toggle-group { display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; }
 .toggle-group input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
 
 /* Registration table */
 .reg-table input {
-  width: 100%;
-  padding: 0.3rem 0.4rem;
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  font-size: 0.82rem;
+  width: 100%; padding: 0.3rem 0.4rem; border: 1px solid var(--border); border-radius: 3px; font-size: 0.82rem;
 }
 .reg-table select {
-  width: 100%;
-  padding: 0.3rem 0.4rem;
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  font-size: 0.82rem;
+  width: 100%; padding: 0.3rem 0.4rem; border: 1px solid var(--border); border-radius: 3px; font-size: 0.82rem;
 }
 .reg-table td { padding: 0.3rem; }
 
@@ -378,8 +457,7 @@ td .action-btns { display: flex; gap: 0.3rem; justify-content: center; }
   .section { box-shadow: none; }
   .section.print-active { display: block !important; page-break-after: always; }
   .section:not(.print-active) { display: none !important; }
-  #tab-settings { display: none !important; }
-  #tab-registration { display: none !important; }
+  #tab-settings, #tab-registration, #tab-home { display: none !important; }
   body { background: white; }
   table { font-size: 0.72rem; }
   thead th { background: #333 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -399,7 +477,7 @@ td .action-btns { display: flex; gap: 0.3rem; justify-content: center; }
 .login-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, #00529B 50%, var(--accent) 100%);
   z-index: 300;
   display: flex;
   align-items: center;
@@ -408,15 +486,16 @@ td .action-btns { display: flex; gap: 0.3rem; justify-content: center; }
 .login-overlay.hidden { display: none; }
 .login-card {
   background: var(--card);
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 2.5rem 2rem;
   text-align: center;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.25);
-  max-width: 380px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  max-width: 400px;
   width: 90%;
 }
-.login-card h1 { font-size: 1.8rem; color: var(--primary); margin-bottom: 0.25rem; }
-.login-card p { font-size: 0.9rem; color: var(--text-light); margin-bottom: 1.5rem; }
+.login-card h1 { font-size: 1.8rem; color: var(--primary); margin-bottom: 0.15rem; font-weight: 800; letter-spacing: 1px; }
+.login-card .login-accent { font-size: 1rem; color: var(--accent); font-weight: 700; margin-bottom: 0.5rem; }
+.login-card p { font-size: 0.88rem; color: var(--text-light); margin-bottom: 1.5rem; }
 .login-card .login-error { color: var(--danger); font-size: 0.82rem; margin-top: 0.75rem; display: none; }
 .btn-google {
   display: inline-flex;
@@ -432,7 +511,7 @@ td .action-btns { display: flex; gap: 0.3rem; justify-content: center; }
   color: var(--text);
   transition: all 0.2s;
 }
-.btn-google:hover { border-color: var(--primary-light); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.btn-google:hover { border-color: var(--accent); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 .btn-google svg { width: 20px; height: 20px; }
 
 /* Header user info */
@@ -445,12 +524,7 @@ td .action-btns { display: flex; gap: 0.3rem; justify-content: center; }
   left: 1rem;
   font-size: 0.75rem;
 }
-.user-info img {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.4);
-}
+.user-info img { width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.4); }
 .user-info .user-name { color: rgba(255,255,255,0.9); font-weight: 600; }
 .user-info .role-badge {
   display: inline-block;
@@ -464,6 +538,7 @@ td .action-btns { display: flex; gap: 0.3rem; justify-content: center; }
 .role-admin { background: rgba(231,76,60,0.3); color: #fff; }
 .role-judge { background: rgba(46,204,113,0.3); color: #fff; }
 .role-viewer { background: rgba(255,255,255,0.2); color: rgba(255,255,255,0.8); }
+.role-dataentry { background: rgba(245,130,32,0.4); color: #fff; }
 .btn-logout {
   background: rgba(255,255,255,0.15);
   border: 1px solid rgba(255,255,255,0.25);
@@ -476,7 +551,7 @@ td .action-btns { display: flex; gap: 0.3rem; justify-content: center; }
 }
 .btn-logout:hover { background: rgba(255,255,255,0.25); }
 
-/* User management table */
+/* User management */
 .user-mgmt-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
 .user-mgmt-table th { background: var(--primary); color: white; padding: 0.5rem 0.6rem; text-align: left; font-size: 0.78rem; }
 .user-mgmt-table td { padding: 0.5rem 0.6rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
@@ -487,8 +562,8 @@ td .action-btns { display: flex; gap: 0.3rem; justify-content: center; }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .header h1 { font-size: 1.2rem; }
-  .nav-tab { padding: 0.4rem 0.6rem; font-size: 0.75rem; }
+  .header h1 { font-size: 1.1rem; }
+  .nav-tab { padding: 0.35rem 0.5rem; font-size: 0.7rem; }
   .form-grid { grid-template-columns: 1fr 1fr; }
   .section { padding: 1rem; }
   .toolbar { flex-direction: column; align-items: stretch; }
@@ -497,6 +572,9 @@ td .action-btns { display: flex; gap: 0.3rem; justify-content: center; }
   .filter-bar { flex-direction: column; align-items: stretch; }
   .user-info { position: static; justify-content: center; margin-bottom: 0.3rem; }
   .user-info .user-name { display: none; }
+  .landing-hero h2 { font-size: 1.5rem; }
+  .landing-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.75rem; }
+  .landing-card { padding: 1rem 0.75rem; }
 }
 </style>
 </head>
@@ -505,8 +583,9 @@ td .action-btns { display: flex; gap: 0.3rem; justify-content: center; }
 <!-- Login Overlay -->
 <div id="login-overlay" class="login-overlay">
   <div class="login-card">
-    <h1>PresentScore</h1>
-    <p>Sign in to access the competition management system</p>
+    <h1>KSEF ANALYSIS</h1>
+    <div class="login-accent">Kenya Science &amp; Engineering Fair</div>
+    <p>Sign in to access the competition analysis system</p>
     <button class="btn-google" onclick="googleSignIn()">
       <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
       Sign in with Google
@@ -522,25 +601,114 @@ td .action-btns { display: flex; gap: 0.3rem; justify-content: center; }
     <span class="role-badge" id="user-role-badge"></span>
     <button class="btn-logout" onclick="signOutUser()">Logout</button>
   </div>
-  <h1 id="app-title">PresentScore</h1>
-  <p id="app-subtitle">National Science &amp; Engineering Fair — Competition Management System</p>
+  <h1 id="app-title">KSEF ANALYSIS</h1>
+  <p id="app-subtitle">Kenya Science &amp; Engineering Fair — Competition Analysis System</p>
   <span id="sync-status" class="sync-indicator sync-connecting"><span class="dot"></span>Connecting...</span>
 </div>
 
 <div class="nav-tabs" id="nav-tabs">
-  <button class="nav-tab active" onclick="switchTab('registration')">Registration</button>
+  <button class="nav-tab home-tab active" onclick="switchTab('home')">Home</button>
+  <button class="nav-tab" onclick="switchTab('registration')">Registration</button>
   <button class="nav-tab" onclick="switchTab('entry')">Data Entry</button>
   <button class="nav-tab" onclick="switchTab('rankings')">Presenter Rankings</button>
-  <button class="nav-tab" onclick="switchTab('subcounty')">Sub-County Leaderboard</button>
-  <button class="nav-tab" onclick="switchTab('schools')">School Leaderboard</button>
+  <button class="nav-tab" onclick="switchTab('subcounty')">Sub-County Ranking</button>
+  <button class="nav-tab" onclick="switchTab('schools')">School Ranking</button>
+  <button class="nav-tab" onclick="switchTab('girls-schools')">Girls Schools</button>
+  <button class="nav-tab" onclick="switchTab('boys-schools')">Boys Schools</button>
+  <button class="nav-tab" onclick="switchTab('mixed-schools')">Mixed Schools</button>
+  <button class="nav-tab" onclick="switchTab('public-schools')">Public Schools</button>
+  <button class="nav-tab" onclick="switchTab('private-schools')">Private Schools</button>
   <button class="nav-tab" onclick="switchTab('settings')">Settings</button>
   <button class="nav-tab" id="nav-tab-users" onclick="switchTab('users')" style="display:none;">User Management</button>
 </div>
 
 <div class="main">
 
+  <!-- ========== LANDING PAGE (HOME) ========== -->
+  <div id="tab-home" class="section active">
+    <div class="landing-page">
+      <div class="landing-hero">
+        <h2>KSEF ANALYSIS</h2>
+        <div class="accent-bar"></div>
+        <p>Kenya Science &amp; Engineering Fair — Competition Analysis &amp; Management System</p>
+      </div>
+
+      <div class="landing-section-label">Administration</div>
+      <div class="landing-grid" id="landing-admin-cards">
+        <div class="landing-card card-blue" onclick="switchTab('registration')">
+          <span class="card-icon">&#128221;</span>
+          <h3>Registration</h3>
+          <p>Import &amp; manage competitor entries</p>
+        </div>
+        <div class="landing-card card-orange" onclick="switchTab('entry')">
+          <span class="card-icon">&#9998;</span>
+          <h3>Data Entry</h3>
+          <p>Enter scores for all judges &amp; sections</p>
+        </div>
+        <div class="landing-card card-blue" onclick="switchTab('settings')">
+          <span class="card-icon">&#9881;</span>
+          <h3>Settings</h3>
+          <p>Configure categories, judges &amp; scoring</p>
+        </div>
+        <div class="landing-card card-dark" id="landing-card-users" onclick="switchTab('users')">
+          <span class="card-icon">&#128101;</span>
+          <h3>User Management</h3>
+          <p>Manage roles &amp; permissions</p>
+        </div>
+      </div>
+
+      <div class="landing-section-label">Rankings &amp; Analysis</div>
+      <div class="landing-grid">
+        <div class="landing-card card-orange" onclick="switchTab('rankings')">
+          <span class="card-icon">&#127942;</span>
+          <h3>Presenter Rankings</h3>
+          <p>Individual presenter scores &amp; positions</p>
+        </div>
+        <div class="landing-card card-blue" onclick="switchTab('subcounty')">
+          <span class="card-icon">&#127463;</span>
+          <h3>Sub-County Ranking</h3>
+          <p>Aggregated scores by sub-county</p>
+        </div>
+        <div class="landing-card card-blue" onclick="switchTab('schools')">
+          <span class="card-icon">&#127979;</span>
+          <h3>School Ranking</h3>
+          <p>All schools overall ranking</p>
+        </div>
+      </div>
+
+      <div class="landing-section-label">School Category Rankings</div>
+      <div class="landing-grid">
+        <div class="landing-card card-orange" onclick="switchTab('girls-schools')">
+          <span class="card-icon">&#9792;</span>
+          <h3>Girls Schools</h3>
+          <p>Ranking for girls-only schools</p>
+        </div>
+        <div class="landing-card card-blue" onclick="switchTab('boys-schools')">
+          <span class="card-icon">&#9794;</span>
+          <h3>Boys Schools</h3>
+          <p>Ranking for boys-only schools</p>
+        </div>
+        <div class="landing-card card-orange" onclick="switchTab('mixed-schools')">
+          <span class="card-icon">&#9890;</span>
+          <h3>Mixed Schools</h3>
+          <p>Ranking for mixed/co-ed schools</p>
+        </div>
+        <div class="landing-card card-blue" onclick="switchTab('public-schools')">
+          <span class="card-icon">&#127963;</span>
+          <h3>Public Schools</h3>
+          <p>Ranking for public schools</p>
+        </div>
+        <div class="landing-card card-dark" onclick="switchTab('private-schools')">
+          <span class="card-icon">&#127960;</span>
+          <h3>Private Schools</h3>
+          <p>Ranking for private schools</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ========== REGISTRATION ========== -->
-  <div id="tab-registration" class="section active">
+  <div id="tab-registration" class="section">
     <div class="section-title">Registration — Import &amp; Add Entries</div>
 
     <div class="toolbar no-print">
@@ -563,6 +731,8 @@ td .action-btns { display: flex; gap: 0.3rem; justify-content: center; }
             <th>Presenter 1</th>
             <th>Presenter 2</th>
             <th>School</th>
+            <th>School Gender</th>
+            <th>School Type</th>
             <th>Project Title</th>
             <th style="width:60px">Prev. PSN</th>
             <th class="no-print" style="width:40px">Del</th>
@@ -654,9 +824,9 @@ td .action-btns { display: flex; gap: 0.3rem; justify-content: center; }
     </div>
   </div>
 
-  <!-- ========== SUB-COUNTY LEADERBOARD ========== -->
+  <!-- ========== SUB-COUNTY RANKING ========== -->
   <div id="tab-subcounty" class="section">
-    <div class="section-title">Sub-County Leaderboard</div>
+    <div class="section-title">Sub-County Ranking</div>
 
     <div class="toolbar no-print">
       <button class="btn btn-accent" onclick="printLeaderboard('subcounty')">Print / PDF</button>
@@ -671,13 +841,13 @@ td .action-btns { display: flex; gap: 0.3rem; justify-content: center; }
         <thead id="sc-thead"></thead>
         <tbody id="sc-body"></tbody>
       </table>
-      <div id="sc-empty" class="empty-state">Leaderboard auto-generated from presenter rankings.</div>
+      <div id="sc-empty" class="empty-state">Ranking auto-generated from presenter scores.</div>
     </div>
   </div>
 
-  <!-- ========== SCHOOL LEADERBOARD ========== -->
+  <!-- ========== SCHOOL RANKING (ALL) ========== -->
   <div id="tab-schools" class="section">
-    <div class="section-title">School Leaderboard</div>
+    <div class="section-title">School Ranking — All Schools</div>
 
     <div class="toolbar no-print">
       <button class="btn btn-accent" onclick="printLeaderboard('schools')">Print / PDF</button>
@@ -692,7 +862,112 @@ td .action-btns { display: flex; gap: 0.3rem; justify-content: center; }
         <thead id="sch-thead"></thead>
         <tbody id="sch-body"></tbody>
       </table>
-      <div id="sch-empty" class="empty-state">Leaderboard auto-generated from presenter rankings.</div>
+      <div id="sch-empty" class="empty-state">Ranking auto-generated from presenter scores.</div>
+    </div>
+  </div>
+
+  <!-- ========== GIRLS SCHOOLS RANKING ========== -->
+  <div id="tab-girls-schools" class="section">
+    <div class="section-title">Girls Schools Ranking</div>
+
+    <div class="toolbar no-print">
+      <button class="btn btn-accent" onclick="printLeaderboard('girls-schools')">Print / PDF</button>
+    </div>
+
+    <div class="table-wrap">
+      <div class="print-title">
+        <h2 id="gs-print-title"></h2>
+        <p id="gs-print-subtitle"></p>
+      </div>
+      <table>
+        <thead id="gs-thead"></thead>
+        <tbody id="gs-body"></tbody>
+      </table>
+      <div id="gs-empty" class="empty-state">No girls school entries found.</div>
+    </div>
+  </div>
+
+  <!-- ========== BOYS SCHOOLS RANKING ========== -->
+  <div id="tab-boys-schools" class="section">
+    <div class="section-title">Boys Schools Ranking</div>
+
+    <div class="toolbar no-print">
+      <button class="btn btn-accent" onclick="printLeaderboard('boys-schools')">Print / PDF</button>
+    </div>
+
+    <div class="table-wrap">
+      <div class="print-title">
+        <h2 id="bs-print-title"></h2>
+        <p id="bs-print-subtitle"></p>
+      </div>
+      <table>
+        <thead id="bs-thead"></thead>
+        <tbody id="bs-body"></tbody>
+      </table>
+      <div id="bs-empty" class="empty-state">No boys school entries found.</div>
+    </div>
+  </div>
+
+  <!-- ========== MIXED SCHOOLS RANKING ========== -->
+  <div id="tab-mixed-schools" class="section">
+    <div class="section-title">Mixed Schools Ranking</div>
+
+    <div class="toolbar no-print">
+      <button class="btn btn-accent" onclick="printLeaderboard('mixed-schools')">Print / PDF</button>
+    </div>
+
+    <div class="table-wrap">
+      <div class="print-title">
+        <h2 id="ms-print-title"></h2>
+        <p id="ms-print-subtitle"></p>
+      </div>
+      <table>
+        <thead id="ms-thead"></thead>
+        <tbody id="ms-body"></tbody>
+      </table>
+      <div id="ms-empty" class="empty-state">No mixed school entries found.</div>
+    </div>
+  </div>
+
+  <!-- ========== PUBLIC SCHOOLS RANKING ========== -->
+  <div id="tab-public-schools" class="section">
+    <div class="section-title">Public Schools Ranking</div>
+
+    <div class="toolbar no-print">
+      <button class="btn btn-accent" onclick="printLeaderboard('public-schools')">Print / PDF</button>
+    </div>
+
+    <div class="table-wrap">
+      <div class="print-title">
+        <h2 id="ps-print-title"></h2>
+        <p id="ps-print-subtitle"></p>
+      </div>
+      <table>
+        <thead id="ps-thead"></thead>
+        <tbody id="ps-body"></tbody>
+      </table>
+      <div id="ps-empty" class="empty-state">No public school entries found.</div>
+    </div>
+  </div>
+
+  <!-- ========== PRIVATE SCHOOLS RANKING ========== -->
+  <div id="tab-private-schools" class="section">
+    <div class="section-title">Private Schools Ranking</div>
+
+    <div class="toolbar no-print">
+      <button class="btn btn-accent" onclick="printLeaderboard('private-schools')">Print / PDF</button>
+    </div>
+
+    <div class="table-wrap">
+      <div class="print-title">
+        <h2 id="pv-print-title"></h2>
+        <p id="pv-print-subtitle"></p>
+      </div>
+      <table>
+        <thead id="pv-thead"></thead>
+        <tbody id="pv-body"></tbody>
+      </table>
+      <div id="pv-empty" class="empty-state">No private school entries found.</div>
     </div>
   </div>
 
@@ -707,7 +982,7 @@ td .action-btns { display: flex; gap: 0.3rem; justify-content: center; }
         <div class="settings-inline">
           <div class="form-group">
             <label>Title</label>
-            <input type="text" id="set-title" placeholder="PresentScore">
+            <input type="text" id="set-title" placeholder="KSEF ANALYSIS">
           </div>
           <div class="form-group">
             <label>Subtitle</label>
@@ -750,6 +1025,7 @@ td .action-btns { display: flex; gap: 0.3rem; justify-content: center; }
       <!-- Points Mapping -->
       <div class="settings-card">
         <h4>Points Mapping (Position &rarr; Points)</h4>
+        <p style="font-size:0.78rem;color:var(--text-light);margin-bottom:0.5rem;">Positions beyond this list will receive <strong>1 point</strong> each.</p>
         <div id="set-points-list"></div>
         <div class="settings-add-row" style="margin-top:0.5rem;">
           <button class="btn btn-primary btn-sm" onclick="addPointsTier()">+ Add Tier</button>
@@ -805,6 +1081,27 @@ td .action-btns { display: flex; gap: 0.3rem; justify-content: center; }
       </table>
       <div id="users-empty" class="empty-state">No users have signed in yet.</div>
     </div>
+    <div style="margin-top:1.5rem; padding:1rem; background:#f8f9fa; border-radius:var(--radius); border:1px solid var(--border);">
+      <h4 style="color:var(--primary); margin-bottom:0.75rem;">Role Descriptions</h4>
+      <table style="width:100%; font-size:0.82rem; border-collapse:collapse;">
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:0.4rem 0.6rem; font-weight:700; color:var(--danger);">Admin</td>
+          <td style="padding:0.4rem 0.6rem;">Full access to all features: registration, scoring, rankings, settings, and user management.</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:0.4rem 0.6rem; font-weight:700; color:var(--accent);">Data Entry</td>
+          <td style="padding:0.4rem 0.6rem;">Can enter scores for <strong>all judges</strong> in all categories. Cannot view totals, averages, positions, or rankings.</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:0.4rem 0.6rem; font-weight:700; color:var(--success);">Judge 1 / 2 / 3</td>
+          <td style="padding:0.4rem 0.6rem;">Can enter scores only for their assigned judge column. Can see totals and averages for their entries.</td>
+        </tr>
+        <tr>
+          <td style="padding:0.4rem 0.6rem; font-weight:700; color:var(--text-light);">Viewer</td>
+          <td style="padding:0.4rem 0.6rem;">Read-only access to presenter rankings and all school/sub-county rankings.</td>
+        </tr>
+      </table>
+    </div>
   </div>
 
 </div>
@@ -840,12 +1137,10 @@ function initFirebase() {
   try {
     firebase.initializeApp(firebaseConfig);
     db = firebase.firestore();
-    // Enable offline persistence
     db.enablePersistence({ synchronizeTabs: true }).catch(err => {
       console.warn('Firestore persistence error:', err.code);
     });
     updateSyncStatus('connecting');
-    // Auth state listener — Firestore listeners are set up after successful auth
     firebase.auth().onAuthStateChanged(handleAuthStateChanged);
   } catch (err) {
     console.error('Firebase init error:', err);
@@ -866,7 +1161,6 @@ function setupFirestoreListeners() {
   if (!db || firestoreListenersActive) return;
   firestoreListenersActive = true;
 
-  // Listen to entries collection
   db.collection('entries').onSnapshot(snapshot => {
     fromFirestore = true;
     entries = [];
@@ -875,10 +1169,8 @@ function setupFirestoreListeners() {
       data.id = doc.id;
       entries.push(data);
     });
-    // Recalculate locally
     entries.forEach(e => calcEntry(e));
     assignPositions();
-    // Cache to localStorage
     localStorage.setItem('ps_entries', JSON.stringify(entries));
     renderAll();
     updateSyncStatus('live');
@@ -888,7 +1180,6 @@ function setupFirestoreListeners() {
     updateSyncStatus('offline');
   });
 
-  // Listen to settings document
   db.collection('config').doc('settings').onSnapshot(doc => {
     if (!doc.exists) return;
     fromFirestore = true;
@@ -901,7 +1192,6 @@ function setupFirestoreListeners() {
     TOP_N = s.topN || 3;
     APP_TITLE = s.title || DEFAULT_TITLE;
     APP_SUBTITLE = s.subtitle || DEFAULT_SUBTITLE;
-    // Cache to localStorage
     cacheSettingsToLocal();
     renderAll();
     fromFirestore = false;
@@ -921,7 +1211,6 @@ function cacheSettingsToLocal() {
   localStorage.setItem('ps_subtitle', APP_SUBTITLE);
 }
 
-// Write a single entry to Firestore
 function firestoreSaveEntry(entry) {
   if (!db || fromFirestore) return;
   const data = JSON.parse(JSON.stringify(entry));
@@ -931,7 +1220,6 @@ function firestoreSaveEntry(entry) {
   });
 }
 
-// Write multiple entries in batches (max 500 per batch)
 function firestoreSaveEntries(entriesToSave) {
   if (!db || fromFirestore) return;
   const chunks = [];
@@ -951,7 +1239,6 @@ function firestoreSaveEntries(entriesToSave) {
   });
 }
 
-// Delete a single entry from Firestore
 function firestoreDeleteEntry(id) {
   if (!db || fromFirestore) return;
   db.collection('entries').doc(id).delete().catch(err => {
@@ -959,25 +1246,19 @@ function firestoreDeleteEntry(id) {
   });
 }
 
-// Clear all entries from Firestore
 function firestoreClearAllEntries() {
   if (!db) return;
   db.collection('entries').get().then(snapshot => {
-    const chunks = [];
     const docs = [];
     snapshot.forEach(doc => docs.push(doc.ref));
     for (let i = 0; i < docs.length; i += 450) {
-      chunks.push(docs.slice(i, i + 450));
-    }
-    chunks.forEach(chunk => {
       const batch = db.batch();
-      chunk.forEach(ref => batch.delete(ref));
+      docs.slice(i, i + 450).forEach(ref => batch.delete(ref));
       batch.commit();
-    });
+    }
   });
 }
 
-// Save settings to Firestore
 function firestoreSaveSettings() {
   if (!db || fromFirestore) return;
   db.collection('config').doc('settings').set({
@@ -994,7 +1275,6 @@ function firestoreSaveSettings() {
   });
 }
 
-// Clear settings from Firestore (reset to defaults)
 function firestoreClearSettings() {
   if (!db) return;
   db.collection('config').doc('settings').delete().catch(err => {
@@ -1013,8 +1293,11 @@ const DEFAULT_SECTIONS = [
   { key: 'C', label: 'Presentation' }
 ];
 const DEFAULT_POINTS = { 1: 6, 2: 5, 3: 4, 4: 3, 5: 2, 6: 1 };
-const DEFAULT_TITLE = 'PresentScore';
-const DEFAULT_SUBTITLE = 'National Science & Engineering Fair — Competition Management System';
+const DEFAULT_TITLE = 'KSEF ANALYSIS';
+const DEFAULT_SUBTITLE = 'Kenya Science & Engineering Fair — Competition Analysis System';
+
+const SCHOOL_GENDERS = ['Girls', 'Boys', 'Mixed'];
+const SCHOOL_TYPES = ['Public', 'Private'];
 
 // ==================== STATE ====================
 let CATEGORIES = [...DEFAULT_CATEGORIES];
@@ -1026,8 +1309,8 @@ let TOP_N = 3;
 let APP_TITLE = DEFAULT_TITLE;
 let APP_SUBTITLE = DEFAULT_SUBTITLE;
 
-let entries = []; // main data array
-let currentSection = 'A'; // for data entry tab
+let entries = [];
+let currentSection = 'A';
 
 // ==================== SETTINGS ====================
 function loadSettings() {
@@ -1053,7 +1336,6 @@ function saveSettings() {
   OUTLIER_THRESHOLD = parseInt(document.getElementById('set-outlier').value) || 5;
   TOP_N = parseInt(document.getElementById('set-top-n').value) || 3;
 
-  // Read section labels
   SECTIONS = [];
   document.querySelectorAll('#set-section-labels .form-group').forEach(fg => {
     const key = fg.querySelector('label').textContent.trim();
@@ -1062,7 +1344,6 @@ function saveSettings() {
   });
   if (SECTIONS.length === 0) SECTIONS = JSON.parse(JSON.stringify(DEFAULT_SECTIONS));
 
-  // Read points
   POINTS_MAP = {};
   document.querySelectorAll('#set-points-list .points-row').forEach((row, i) => {
     const val = parseFloat(row.querySelector('input').value) || 0;
@@ -1109,7 +1390,7 @@ function resetSettings() {
 function applyTitle() {
   document.getElementById('app-title').textContent = APP_TITLE;
   document.getElementById('app-subtitle').innerHTML = APP_SUBTITLE.replace(/&/g, '&amp;');
-  document.title = APP_TITLE + ' — Competition Management System';
+  document.title = APP_TITLE + ' — Kenya Science & Engineering Fair';
 }
 
 function renderSettingsUI() {
@@ -1119,21 +1400,18 @@ function renderSettingsUI() {
   document.getElementById('set-outlier').value = OUTLIER_THRESHOLD;
   document.getElementById('set-top-n').value = TOP_N;
 
-  // Section labels
   const slDiv = document.getElementById('set-section-labels');
   slDiv.innerHTML = '';
   SECTIONS.forEach(s => {
     slDiv.innerHTML += `<div class="form-group"><label>${s.key}</label><input type="text" value="${s.label}" placeholder="${s.key}"></div>`;
   });
 
-  // Categories
   const catList = document.getElementById('set-cat-list');
   catList.innerHTML = '';
   CATEGORIES.forEach((c, i) => {
     catList.innerHTML += `<li>${c} <button class="btn btn-sm btn-danger" onclick="removeCategory(${i})">x</button></li>`;
   });
 
-  // Points
   const ptList = document.getElementById('set-points-list');
   ptList.innerHTML = '';
   const sortedKeys = Object.keys(POINTS_MAP).map(Number).sort((a, b) => a - b);
@@ -1174,7 +1452,7 @@ function removeLastPointsTier() {
 
 function addSectionSetting() {
   const keys = SECTIONS.map(s => s.key);
-  const nextChar = String.fromCharCode(65 + keys.length); // A=65
+  const nextChar = String.fromCharCode(65 + keys.length);
   SECTIONS.push({ key: nextChar, label: nextChar });
   renderSettingsUI();
 }
@@ -1210,25 +1488,33 @@ function assignPositions() {
     catEntries.sort((a, b) => b.average - a.average);
     catEntries.forEach((e, i) => {
       e.position = i + 1;
-      e.points = POINTS_MAP[i + 1] || 0;
+      // Positions beyond the points map get 1 point (instead of 0)
+      e.points = POINTS_MAP[i + 1] != null ? POINTS_MAP[i + 1] : 1;
     });
   });
 }
 
 // ==================== TAB SWITCHING ====================
-const TAB_NAMES = ['registration', 'entry', 'rankings', 'subcounty', 'schools', 'settings', 'users'];
+const TAB_NAMES = ['home', 'registration', 'entry', 'rankings', 'subcounty', 'schools',
+  'girls-schools', 'boys-schools', 'mixed-schools', 'public-schools', 'private-schools',
+  'settings', 'users'];
 
 function switchTab(name) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   const idx = TAB_NAMES.indexOf(name);
-  if (idx >= 0) document.querySelectorAll('.nav-tab')[idx].classList.add('active');
+  if (idx >= 0) document.querySelectorAll('#nav-tabs .nav-tab')[idx].classList.add('active');
 
   if (name === 'entry') renderEntryTable();
   if (name === 'rankings') renderRankings();
-  if (name === 'subcounty') renderSubcountyLeaderboard();
-  if (name === 'schools') renderSchoolLeaderboard();
+  if (name === 'subcounty') renderSubcountyRanking();
+  if (name === 'schools') renderSchoolRanking();
+  if (name === 'girls-schools') renderSchoolTypeRanking('Girls', 'gs');
+  if (name === 'boys-schools') renderSchoolTypeRanking('Boys', 'bs');
+  if (name === 'mixed-schools') renderSchoolTypeRanking('Mixed', 'ms');
+  if (name === 'public-schools') renderSchoolTypeRanking('Public', 'ps');
+  if (name === 'private-schools') renderSchoolTypeRanking('Private', 'pv');
   if (name === 'users') renderUsersTable();
 }
 
@@ -1245,10 +1531,12 @@ function closeModal() {
 
 // ==================== REGISTRATION ====================
 function addRegRow(data) {
-  const d = data || { subcounty: '', category: '', presenter1: '', presenter2: '', school: '', projectTitle: '', previousPosition: '' };
+  const d = data || { subcounty: '', category: '', presenter1: '', presenter2: '', school: '', schoolGender: '', schoolType: '', projectTitle: '', previousPosition: '' };
   const body = document.getElementById('reg-body');
   const rowNum = body.children.length + 1;
   const catOptions = CATEGORIES.map(c => `<option value="${c}" ${c === d.category ? 'selected' : ''}>${c}</option>`).join('');
+  const genderOptions = SCHOOL_GENDERS.map(g => `<option value="${g}" ${g === d.schoolGender ? 'selected' : ''}>${g}</option>`).join('');
+  const typeOptions = SCHOOL_TYPES.map(t => `<option value="${t}" ${t === d.schoolType ? 'selected' : ''}>${t}</option>`).join('');
 
   const tr = document.createElement('tr');
   tr.innerHTML = `
@@ -1258,6 +1546,8 @@ function addRegRow(data) {
     <td><input type="text" value="${esc(d.presenter1)}" data-field="presenter1" placeholder="Presenter 1"></td>
     <td><input type="text" value="${esc(d.presenter2)}" data-field="presenter2" placeholder="Presenter 2 (optional)"></td>
     <td><input type="text" value="${esc(d.school)}" data-field="school" placeholder="School"></td>
+    <td><select data-field="schoolGender"><option value="">--</option>${genderOptions}</select></td>
+    <td><select data-field="schoolType"><option value="">--</option>${typeOptions}</select></td>
     <td><input type="text" value="${esc(d.projectTitle)}" data-field="projectTitle" placeholder="Project Title"></td>
     <td><input type="number" value="${d.previousPosition || ''}" data-field="previousPosition" min="0" style="width:50px"></td>
     <td class="no-print"><button class="btn btn-sm btn-danger" onclick="this.closest('tr').remove();renumberRegRows()">x</button></td>
@@ -1287,20 +1577,19 @@ function saveAllRegistrations() {
     const subcounty = get('subcounty');
     const category = get('category');
     const presenter1 = get('presenter1');
-    if (!presenter1) return; // skip empty rows
+    if (!presenter1) return;
 
-    // Check if this entry already exists (by presenter1 + category)
     const existing = entries.find(e => e.presenter1 === presenter1 && e.category === category);
     if (existing) {
-      // Update existing
       existing.subcounty = subcounty;
       existing.presenter2 = get('presenter2');
       existing.school = get('school');
+      existing.schoolGender = get('schoolGender');
+      existing.schoolType = get('schoolType');
       existing.projectTitle = get('projectTitle');
       existing.previousPosition = parseInt(get('previousPosition')) || 0;
       changedEntries.push(existing);
     } else {
-      // Create new entry with empty scores
       const scores = {};
       for (let j = 1; j <= NUM_JUDGES; j++) {
         scores['j' + j] = {};
@@ -1316,6 +1605,8 @@ function saveAllRegistrations() {
         presenter1,
         presenter2: get('presenter2'),
         school: get('school'),
+        schoolGender: get('schoolGender'),
+        schoolType: get('schoolType'),
         projectTitle: get('projectTitle'),
         previousPosition: parseInt(get('previousPosition')) || 0,
         scores,
@@ -1365,7 +1656,6 @@ function importExcel(event) {
       const ws = wb.Sheets[wb.SheetNames[0]];
       const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
 
-      // Find header row
       let headerRow = -1;
       for (let i = 0; i < Math.min(10, data.length); i++) {
         const row = (data[i] || []).map(c => String(c || '').toUpperCase());
@@ -1390,10 +1680,29 @@ function importExcel(event) {
         const school = String(row[5] || '').trim();
         const projectTitle = String(row[6] || '').trim();
 
+        // Try to detect school gender and type from columns 7 and 8 if they exist
+        let schoolGender = '';
+        let schoolType = '';
+        let scoreStartCol = 7;
+
+        // Check if columns after project title contain school gender/type info
+        const col7 = String(row[7] || '').trim();
+        const col8 = String(row[8] || '').trim();
+        if (SCHOOL_GENDERS.includes(col7) || ['GIRLS', 'BOYS', 'MIXED'].includes(col7.toUpperCase())) {
+          schoolGender = col7.charAt(0).toUpperCase() + col7.slice(1).toLowerCase();
+          if (schoolGender === 'Girls' || schoolGender === 'Boys' || schoolGender === 'Mixed') {
+            scoreStartCol = 8;
+          }
+          if (SCHOOL_TYPES.includes(col8) || ['PUBLIC', 'PRIVATE'].includes(col8.toUpperCase())) {
+            schoolType = col8.charAt(0).toUpperCase() + col8.slice(1).toLowerCase();
+            scoreStartCol = 9;
+          }
+        }
+
         if (!presenter1) continue;
 
         const scores = {};
-        let colIdx = 7;
+        let colIdx = scoreStartCol;
         for (let j = 1; j <= NUM_JUDGES; j++) {
           scores['j' + j] = {};
           SECTIONS.forEach(s => {
@@ -1413,9 +1722,6 @@ function importExcel(event) {
           entryStatus[s.key] = hasScores ? 'entered' : 'pending';
         });
 
-        const psnColIdx = 7 + NUM_JUDGES * (SECTIONS.length + 1) + 1;
-        const prevPsn = row[psnColIdx] != null ? parseInt(row[psnColIdx]) : 0;
-
         const newEntry = {
           id: Date.now() + '-' + Math.random().toString(36).substr(2, 6) + '-' + i,
           subcounty,
@@ -1423,8 +1729,10 @@ function importExcel(event) {
           presenter1,
           presenter2,
           school,
+          schoolGender,
+          schoolType,
           projectTitle,
-          previousPosition: isNaN(prevPsn) ? 0 : prevPsn,
+          previousPosition: 0,
           scores,
           entryStatus,
           judgeTotals: {},
@@ -1552,6 +1860,9 @@ function renderEntryTable() {
   const tbody = document.getElementById('entry-body');
   const empty = document.getElementById('entry-empty');
 
+  const role = currentUserRole();
+  const isDataEntry = role === 'dataentry';
+  const isViewer = role === 'viewer';
   const visibleJudges = getVisibleJudges();
 
   let hdr1 = '<tr><th rowspan="2">#</th><th rowspan="2">Sub-County</th><th rowspan="2">Presenter(s)</th><th rowspan="2">School</th><th rowspan="2">Category</th><th rowspan="2">Project</th>';
@@ -1559,9 +1870,15 @@ function renderEntryTable() {
 
   if (showAll) {
     for (const j of visibleJudges) {
-      hdr1 += `<th colspan="${SECTIONS.length + 1}">J${j}</th>`;
-      SECTIONS.forEach(s => { hdr2 += `<th class="sub-header">${s.key}</th>`; });
-      hdr2 += `<th class="sub-header">Total</th>`;
+      if (isDataEntry) {
+        // Data entry role: show section inputs but NOT total
+        hdr1 += `<th colspan="${SECTIONS.length}">J${j}</th>`;
+        SECTIONS.forEach(s => { hdr2 += `<th class="sub-header">${s.key}</th>`; });
+      } else {
+        hdr1 += `<th colspan="${SECTIONS.length + 1}">J${j}</th>`;
+        SECTIONS.forEach(s => { hdr2 += `<th class="sub-header">${s.key}</th>`; });
+        hdr2 += `<th class="sub-header">Total</th>`;
+      }
     }
   } else {
     for (const j of visibleJudges) {
@@ -1569,8 +1886,10 @@ function renderEntryTable() {
     }
   }
 
-  if (showAll) {
+  if (showAll && !isDataEntry) {
     hdr1 += '<th rowspan="2">AVG</th><th rowspan="2">Status</th></tr>';
+  } else if (showAll && isDataEntry) {
+    hdr1 += '<th rowspan="2">Status</th></tr>';
   } else {
     hdr1 += '<th>Status</th></tr>';
     hdr2 = '';
@@ -1594,23 +1913,26 @@ function renderEntryTable() {
     row += `<td>${esc(entry.category)}</td>`;
     row += `<td style="text-align:left;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${esc(entry.projectTitle)}">${esc(entry.projectTitle)}</td>`;
 
-    const role = currentUserRole();
-    const isViewer = role === 'viewer';
     const judgeNum = role.startsWith('judge') ? role.replace('judge', '') : null;
 
     if (showAll) {
       for (const j of visibleJudges) {
         const jk = 'j' + j;
+        // Data entry and admin can edit all; judges only their column; viewer can't edit
         const disabled = isViewer || (judgeNum && String(j) !== judgeNum) ? ' disabled' : '';
         SECTIONS.forEach(s => {
           const val = entry.scores[jk]?.[s.key];
           row += `<td><input class="score-input" type="number" step="0.1" min="0" value="${val != null ? val : ''}" data-id="${entry.id}" data-judge="${jk}" data-section="${s.key}" onchange="updateScore(this)"${disabled}></td>`;
         });
-        const jt = entry.judgeTotals[jk];
-        const isOutlier = entry.outlierJudge === jk;
-        row += `<td class="total-cell ${isOutlier ? 'outlier-score' : ''}">${jt != null ? jt.toFixed(1) : '-'}</td>`;
+        if (!isDataEntry) {
+          const jt = entry.judgeTotals[jk];
+          const isOutlier = entry.outlierJudge === jk;
+          row += `<td class="total-cell ${isOutlier ? 'outlier-score' : ''}">${jt != null ? jt.toFixed(1) : '-'}</td>`;
+        }
       }
-      row += `<td class="total-cell">${entry.average ? entry.average.toFixed(1) : '-'}</td>`;
+      if (!isDataEntry) {
+        row += `<td class="total-cell">${entry.average ? entry.average.toFixed(4) : '-'}</td>`;
+      }
     } else {
       for (const j of visibleJudges) {
         const jk = 'j' + j;
@@ -1635,13 +1957,13 @@ function updateScore(input) {
   const section = input.dataset.section;
   const val = input.value.trim() === '' ? null : parseFloat(input.value);
 
-  // Role check: judges can only edit their own column
   const role = currentUserRole();
   if (role === 'viewer') { input.value = ''; return; }
   if (role.startsWith('judge')) {
     const allowedJudge = 'j' + role.replace('judge', '');
     if (judge !== allowedJudge) { input.value = ''; return; }
   }
+  // dataentry role can edit all judges — no restriction needed
 
   const entry = entries.find(e => e.id === id);
   if (!entry) return;
@@ -1786,7 +2108,7 @@ function renderRankings() {
     }
 
     const avgClass = entry.position <= 3 ? 'score-high' : '';
-    row += `<td class="total-cell ${avgClass}">${entry.average.toFixed(1)}</td>`;
+    row += `<td class="total-cell ${avgClass}">${entry.average.toFixed(4)}</td>`;
     row += `<td>${entry.points}</td>`;
 
     const tr = document.createElement('tr');
@@ -1798,10 +2120,11 @@ function renderRankings() {
   document.getElementById('rank-print-subtitle').textContent = (catFilter !== '__all__' ? catFilter + ' — ' : '') + 'Presenter Rankings';
 }
 
-// ==================== LEADERBOARDS ====================
-function computeLeaderboard(groupField) {
+// ==================== RANKINGS (LEADERBOARDS) ====================
+function computeLeaderboard(groupField, filterFn) {
   const groups = {};
   entries.forEach(e => {
+    if (filterFn && !filterFn(e)) return;
     const name = e[groupField];
     if (!name) return;
     if (!groups[name]) {
@@ -1857,18 +2180,36 @@ function renderLeaderboardTable(theadId, tbodyId, emptyId, printTitleId, data, l
   document.getElementById(printTitleId).textContent = APP_TITLE;
 }
 
-function renderSubcountyLeaderboard() {
+function renderSubcountyRanking() {
   recalcAll();
   const data = computeLeaderboard('subcounty');
   renderLeaderboardTable('sc-thead', 'sc-body', 'sc-empty', 'sc-print-title', data, 'Sub-County');
-  document.getElementById('sc-print-subtitle').textContent = 'Sub-County Leaderboard';
+  document.getElementById('sc-print-subtitle').textContent = 'Sub-County Ranking';
 }
 
-function renderSchoolLeaderboard() {
+function renderSchoolRanking() {
   recalcAll();
   const data = computeLeaderboard('school');
   renderLeaderboardTable('sch-thead', 'sch-body', 'sch-empty', 'sch-print-title', data, 'School');
-  document.getElementById('sch-print-subtitle').textContent = 'School Leaderboard';
+  document.getElementById('sch-print-subtitle').textContent = 'School Ranking — All Schools';
+}
+
+// ==================== SCHOOL TYPE RANKINGS ====================
+function renderSchoolTypeRanking(type, prefix) {
+  recalcAll();
+  let filterFn;
+  if (['Girls', 'Boys', 'Mixed'].includes(type)) {
+    filterFn = e => e.schoolGender === type;
+  } else {
+    filterFn = e => e.schoolType === type;
+  }
+  const data = computeLeaderboard('school', filterFn);
+  renderLeaderboardTable(
+    prefix + '-thead', prefix + '-body', prefix + '-empty',
+    prefix + '-print-title', data, 'School'
+  );
+  const subtitleEl = document.getElementById(prefix + '-print-subtitle');
+  if (subtitleEl) subtitleEl.textContent = type + ' Schools Ranking';
 }
 
 // ==================== PRINTING ====================
@@ -1952,13 +2293,15 @@ function exportQualifiers() {
 
     if (catEntries.length === 0) return;
 
-    const sheetData = catEntries.map((e, i) => {
+    const sheetData = catEntries.map(e => {
       const row = {
         'Position': e.position,
         'Sub-County': e.subcounty,
         'Presenter 1': e.presenter1,
         'Presenter 2': e.presenter2 || '',
         'School': e.school,
+        'School Gender': e.schoolGender || '',
+        'School Type': e.schoolType || '',
         'Project Title': e.projectTitle,
       };
       for (let j = 1; j <= NUM_JUDGES; j++) {
@@ -1966,10 +2309,10 @@ function exportQualifiers() {
         SECTIONS.forEach(s => {
           row[`J${j}-${s.key}`] = e.scores[jk]?.[s.key] ?? '';
         });
-        row[`J${j} Total`] = e.judgeTotals[jk] != null ? e.judgeTotals[jk] : '';
+        row[`J${j} Total`] = e.judgeTotals[jk] != null ? parseFloat(e.judgeTotals[jk].toFixed(1)) : '';
         if (e.outlierJudge === jk) row[`J${j} Total`] = '(' + row[`J${j} Total`] + ') OMITTED';
       }
-      row['Average'] = parseFloat(e.average.toFixed(2));
+      row['Average'] = parseFloat(e.average.toFixed(4));
       row['Points'] = e.points;
       return row;
     });
@@ -1979,7 +2322,7 @@ function exportQualifiers() {
     XLSX.utils.book_append_sheet(wb, ws, sheetName);
   });
 
-  XLSX.writeFile(wb, `Qualifiers_Top${TOP_N}.xlsx`);
+  XLSX.writeFile(wb, `KSEF_Qualifiers_Top${TOP_N}.xlsx`);
 }
 
 // ==================== JSON EXPORT / IMPORT ====================
@@ -1991,7 +2334,7 @@ function exportAllData() {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'presentscore_backup.json';
+  a.download = 'ksef_analysis_backup.json';
   a.click();
 }
 
@@ -2067,7 +2410,14 @@ function currentUserRole() {
 }
 
 function requireRole(role) {
-  if (currentUserRole() === role) return true;
+  const myRole = currentUserRole();
+  if (myRole === role) return true;
+  // dataentry role can also do score entry actions
+  if (role === 'admin' && myRole === 'dataentry') {
+    alert('This action requires admin access.');
+    return false;
+  }
+  if (myRole === 'admin') return true; // admin can do everything
   alert('This action requires ' + role + ' access.');
   return false;
 }
@@ -2078,7 +2428,7 @@ function getVisibleJudges() {
     const n = parseInt(role.replace('judge', ''));
     return [n];
   }
-  // admin and viewer see all judges
+  // admin, dataentry, and viewer see all judges
   const judges = [];
   for (let j = 1; j <= NUM_JUDGES; j++) judges.push(j);
   return judges;
@@ -2089,7 +2439,6 @@ function googleSignIn() {
   const provider = new firebase.auth.GoogleAuthProvider();
   firebase.auth().signInWithPopup(provider).catch(err => {
     if (err.code === 'auth/popup-blocked' || err.code === 'auth/popup-closed-by-user') {
-      // Fallback to redirect for mobile / popup blocked
       firebase.auth().signInWithRedirect(provider);
     } else {
       const errorEl = document.getElementById('login-error');
@@ -2105,7 +2454,6 @@ function signOutUser() {
 
 function handleAuthStateChanged(user) {
   if (!user) {
-    // Show login overlay, hide user info
     document.getElementById('login-overlay').classList.remove('hidden');
     document.getElementById('user-info').style.display = 'none';
     currentUserDoc = null;
@@ -2113,7 +2461,6 @@ function handleAuthStateChanged(user) {
     return;
   }
 
-  // User is signed in — check/create user doc
   const userRef = db.collection('users').doc(user.uid);
   userRef.get().then(doc => {
     if (doc.exists) {
@@ -2123,10 +2470,8 @@ function handleAuthStateChanged(user) {
         firebase.auth().signOut();
         return;
       }
-      // Update last login
       userRef.update({ lastLogin: firebase.firestore.FieldValue.serverTimestamp() });
     } else {
-      // New user — check if this is the first user ever
       return db.collection('users').get().then(snapshot => {
         const isFirst = snapshot.empty;
         return userRef.set({
@@ -2142,7 +2487,6 @@ function handleAuthStateChanged(user) {
       });
     }
   }).then(() => {
-    // Listen to own user doc in real-time
     if (userDocListener) userDocListener();
     userDocListener = userRef.onSnapshot(doc => {
       if (!doc.exists) return;
@@ -2157,11 +2501,9 @@ function handleAuthStateChanged(user) {
       applyRoleRestrictions();
     });
 
-    // Hide login overlay
     document.getElementById('login-overlay').classList.add('hidden');
     document.getElementById('login-error').style.display = 'none';
 
-    // Setup data listeners now that auth is done
     setupFirestoreListeners();
     setupUsersListener();
   }).catch(err => {
@@ -2185,6 +2527,7 @@ function showUserInfo(user, data) {
   let label = role;
   let cls = 'role-viewer';
   if (role === 'admin') { label = 'Admin'; cls = 'role-admin'; }
+  else if (role === 'dataentry') { label = 'Data Entry'; cls = 'role-dataentry'; }
   else if (role.startsWith('judge')) { label = 'Judge ' + role.replace('judge', ''); cls = 'role-judge'; }
   else { label = 'Viewer'; cls = 'role-viewer'; }
   badge.textContent = label;
@@ -2195,41 +2538,56 @@ function showUserInfo(user, data) {
 function applyRoleRestrictions() {
   const role = currentUserRole();
   const tabs = document.querySelectorAll('#nav-tabs .nav-tab');
-  // Tab indices: 0=registration, 1=entry, 2=rankings, 3=subcounty, 4=schools, 5=settings, 6=users
+  // Tab indices: 0=home, 1=registration, 2=entry, 3=rankings, 4=subcounty, 5=schools,
+  // 6=girls-schools, 7=boys-schools, 8=mixed-schools, 9=public-schools, 10=private-schools,
+  // 11=settings, 12=users
+
+  const rankingTabs = [3, 4, 5, 6, 7, 8, 9, 10]; // All ranking/analysis tabs
 
   if (role === 'admin') {
     tabs.forEach(t => t.style.display = '');
     document.getElementById('nav-tab-users').style.display = '';
+    // Show all landing page cards
+    document.getElementById('landing-admin-cards').style.display = '';
+    document.getElementById('landing-card-users').style.display = '';
+  } else if (role === 'dataentry') {
+    // Data entry: Home + Data Entry only
+    tabs[0].style.display = ''; // home
+    tabs[1].style.display = 'none'; // registration
+    tabs[2].style.display = ''; // entry
+    rankingTabs.forEach(i => { if (tabs[i]) tabs[i].style.display = 'none'; });
+    tabs[11].style.display = 'none'; // settings
+    document.getElementById('nav-tab-users').style.display = 'none';
+    // Hide admin cards on landing page
+    document.getElementById('landing-admin-cards').style.display = 'none';
   } else if (role.startsWith('judge')) {
-    // Judges: only Data Entry
-    tabs[0].style.display = 'none'; // registration
-    tabs[1].style.display = '';     // entry
-    tabs[2].style.display = 'none'; // rankings
-    tabs[3].style.display = 'none'; // subcounty
-    tabs[4].style.display = 'none'; // schools
-    tabs[5].style.display = 'none'; // settings
+    // Judges: Home + Data Entry only
+    tabs[0].style.display = ''; // home
+    tabs[1].style.display = 'none'; // registration
+    tabs[2].style.display = ''; // entry
+    rankingTabs.forEach(i => { if (tabs[i]) tabs[i].style.display = 'none'; });
+    tabs[11].style.display = 'none'; // settings
     document.getElementById('nav-tab-users').style.display = 'none';
+    document.getElementById('landing-admin-cards').style.display = 'none';
   } else {
-    // Viewer: rankings + leaderboards
-    tabs[0].style.display = 'none'; // registration
-    tabs[1].style.display = 'none'; // entry
-    tabs[2].style.display = '';     // rankings
-    tabs[3].style.display = '';     // subcounty
-    tabs[4].style.display = '';     // schools
-    tabs[5].style.display = 'none'; // settings
+    // Viewer: Home + rankings + rankings
+    tabs[0].style.display = ''; // home
+    tabs[1].style.display = 'none'; // registration
+    tabs[2].style.display = 'none'; // entry
+    rankingTabs.forEach(i => { if (tabs[i]) tabs[i].style.display = ''; });
+    tabs[11].style.display = 'none'; // settings
     document.getElementById('nav-tab-users').style.display = 'none';
+    document.getElementById('landing-admin-cards').style.display = 'none';
   }
 
-  // Auto-switch to an allowed tab if current is hidden
+  // Auto-switch to allowed tab if current is hidden
   const activeTab = document.querySelector('.section.active');
   if (activeTab) {
     const activeId = activeTab.id.replace('tab-', '');
     const activeIdx = TAB_NAMES.indexOf(activeId);
     const activeButton = activeIdx >= 0 ? tabs[activeIdx] : null;
     if (activeButton && activeButton.style.display === 'none') {
-      if (role.startsWith('judge')) switchTab('entry');
-      else if (role === 'viewer') switchTab('rankings');
-      else switchTab('registration');
+      switchTab('home');
     }
   }
 
@@ -2276,7 +2634,15 @@ function renderUsersTable() {
   }
   empty.style.display = 'none';
 
-  const roleOptions = ['admin', 'judge1', 'judge2', 'judge3', 'viewer'];
+  const roleOptions = ['admin', 'dataentry', 'judge1', 'judge2', 'judge3', 'viewer'];
+  const roleLabels = {
+    admin: 'Admin',
+    dataentry: 'Data Entry',
+    judge1: 'Judge 1',
+    judge2: 'Judge 2',
+    judge3: 'Judge 3',
+    viewer: 'Viewer'
+  };
 
   tbody.innerHTML = '';
   allUsers.forEach(u => {
@@ -2290,7 +2656,7 @@ function renderUsersTable() {
     const email = esc(u.email || '');
 
     const roleSelect = roleOptions.map(r =>
-      `<option value="${r}" ${u.role === r ? 'selected' : ''}>${r === 'admin' ? 'Admin' : r.startsWith('judge') ? 'Judge ' + r.replace('judge', '') : 'Viewer'}</option>`
+      `<option value="${r}" ${u.role === r ? 'selected' : ''}>${roleLabels[r]}</option>`
     ).join('');
 
     const lastLogin = u.lastLogin
@@ -2333,9 +2699,7 @@ function init() {
   loadSettings();
   loadEntries();
   recalcAll();
-  // Render local data first so cache is visible
   renderAll();
-  // Initialize Firebase (auth will gate the full app)
   initFirebase();
 }
 
