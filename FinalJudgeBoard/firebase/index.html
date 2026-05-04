@@ -1092,7 +1092,7 @@ td .action-btns { display: flex; gap: 0.3rem; justify-content: center; }
         </tr>
         <tr style="border-bottom:1px solid var(--border);">
           <td style="padding:0.4rem 0.6rem; font-weight:700; color:var(--success);">Judge 1 / 2 / 3</td>
-          <td style="padding:0.4rem 0.6rem;">Can enter scores only for their assigned judge column. Can see totals and averages for their entries.</td>
+          <td style="padding:0.4rem 0.6rem;">Can enter scores only for their assigned judge column. <strong>Cannot see totals, averages, or previously entered scores.</strong> Scores disappear after entry to prevent calibration.</td>
         </tr>
         <tr>
           <td style="padding:0.4rem 0.6rem; font-weight:700; color:var(--text-light);">Viewer</td>
@@ -1869,6 +1869,7 @@ function renderEntryTable() {
   const role = currentUserRole();
   const isDataEntry = role === 'dataentry';
   const isViewer = role === 'viewer';
+  const isJudge = role.startsWith('judge');
   const visibleJudges = getVisibleJudges();
 
   let hdr1 = '<tr><th rowspan="2">#</th><th rowspan="2">Sub-County</th><th rowspan="2">Presenter(s)</th><th rowspan="2">School</th><th rowspan="2">Category</th><th rowspan="2">Project</th>';
@@ -1876,8 +1877,8 @@ function renderEntryTable() {
 
   if (showAll) {
     for (const j of visibleJudges) {
-      if (isDataEntry) {
-        // Data entry role: show section inputs but NOT total
+      if (isDataEntry || isJudge) {
+        // Data entry and judge roles: show section inputs but NOT total
         hdr1 += `<th colspan="${SECTIONS.length}">J${j}</th>`;
         SECTIONS.forEach(s => { hdr2 += `<th class="sub-header">${s.key}</th>`; });
       } else {
@@ -1892,9 +1893,9 @@ function renderEntryTable() {
     }
   }
 
-  if (showAll && !isDataEntry) {
+  if (showAll && !isDataEntry && !isJudge) {
     hdr1 += '<th rowspan="2">AVG</th><th rowspan="2">Status</th></tr>';
-  } else if (showAll && isDataEntry) {
+  } else if (showAll && (isDataEntry || isJudge)) {
     hdr1 += '<th rowspan="2">Status</th></tr>';
   } else {
     hdr1 += '<th>Status</th></tr>';
@@ -1928,15 +1929,17 @@ function renderEntryTable() {
         const disabled = isViewer || (judgeNum && String(j) !== judgeNum) ? ' disabled' : '';
         SECTIONS.forEach(s => {
           const val = entry.scores[jk]?.[s.key];
-          row += `<td><input class="score-input" type="number" step="0.1" min="0" value="${val != null ? val : ''}" data-id="${entry.id}" data-judge="${jk}" data-section="${s.key}" onchange="updateScore(this)"${disabled}></td>`;
+          // For judges, hide previously entered scores (show blank)
+          const displayVal = (isJudge && judgeNum && jk === 'j' + judgeNum && val != null) ? '' : (val != null ? val : '');
+          row += `<td><input class="score-input" type="number" step="0.1" min="0" value="${displayVal}" data-id="${entry.id}" data-judge="${jk}" data-section="${s.key}" onchange="updateScore(this)"${disabled}></td>`;
         });
-        if (!isDataEntry) {
+        if (!isDataEntry && !isJudge) {
           const jt = entry.judgeTotals[jk];
           const isOutlier = entry.outlierJudge === jk;
           row += `<td class="total-cell ${isOutlier ? 'outlier-score' : ''}">${jt != null ? jt.toFixed(1) : '-'}</td>`;
         }
       }
-      if (!isDataEntry) {
+      if (!isDataEntry && !isJudge) {
         row += `<td class="total-cell">${entry.average ? entry.average.toFixed(4) : '-'}</td>`;
       }
     } else {
@@ -1944,7 +1947,9 @@ function renderEntryTable() {
         const jk = 'j' + j;
         const disabled = isViewer || (judgeNum && String(j) !== judgeNum) ? ' disabled' : '';
         const val = entry.scores[jk]?.[currentSection];
-        row += `<td><input class="score-input" type="number" step="0.1" min="0" value="${val != null ? val : ''}" data-id="${entry.id}" data-judge="${jk}" data-section="${currentSection}" onchange="updateScore(this)"${disabled}></td>`;
+        // For judges, hide previously entered scores (show blank)
+        const displayVal = (isJudge && judgeNum && jk === 'j' + judgeNum && val != null) ? '' : (val != null ? val : '');
+        row += `<td><input class="score-input" type="number" step="0.1" min="0" value="${displayVal}" data-id="${entry.id}" data-judge="${jk}" data-section="${currentSection}" onchange="updateScore(this)"${disabled}></td>`;
       }
     }
 
@@ -1980,6 +1985,11 @@ function updateScore(input) {
   calcEntry(entry);
   saveEntries();
   firestoreSaveEntry(entry);
+
+  // For judges, clear the input after saving to hide the score
+  if (role.startsWith('judge')) {
+    input.value = '';
+  }
 
   if (document.getElementById('entry-show-all-sections').checked) {
     renderEntryTable();
