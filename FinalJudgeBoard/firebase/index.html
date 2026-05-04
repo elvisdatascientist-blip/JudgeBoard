@@ -2882,9 +2882,9 @@ function applyRoleRestrictions() {
   const tabs = document.querySelectorAll('#nav-tabs .nav-tab');
   // Tab indices: 0=home, 1=registration, 2=entry, 3=rankings, 4=subcounty, 5=schools,
   // 6=girls-schools, 7=boys-schools, 8=mixed-schools, 9=public-schools, 10=private-schools,
-  // 11=settings, 12=users
+  // 11=junior-rankings, 12=settings, 13=users
 
-  const rankingTabs = [3, 4, 5, 6, 7, 8, 9, 10]; // All ranking/analysis tabs
+  const rankingTabs = [3, 4, 5, 6, 7, 8, 9, 10, 11]; // All ranking/analysis tabs (including junior)
 
   if (role === 'admin') {
     tabs.forEach(t => t.style.display = '');
@@ -2898,7 +2898,7 @@ function applyRoleRestrictions() {
     tabs[1].style.display = 'none'; // registration
     tabs[2].style.display = ''; // entry
     rankingTabs.forEach(i => { if (tabs[i]) tabs[i].style.display = 'none'; });
-    tabs[11].style.display = 'none'; // settings
+    tabs[12].style.display = 'none'; // settings
     document.getElementById('nav-tab-users').style.display = 'none';
     // Hide admin cards on landing page
     document.getElementById('landing-admin-cards').style.display = 'none';
@@ -2908,7 +2908,7 @@ function applyRoleRestrictions() {
     tabs[1].style.display = 'none'; // registration
     tabs[2].style.display = ''; // entry
     rankingTabs.forEach(i => { if (tabs[i]) tabs[i].style.display = 'none'; });
-    tabs[11].style.display = 'none'; // settings
+    tabs[12].style.display = 'none'; // settings
     document.getElementById('nav-tab-users').style.display = 'none';
     document.getElementById('landing-admin-cards').style.display = 'none';
   } else {
@@ -2917,7 +2917,7 @@ function applyRoleRestrictions() {
     tabs[1].style.display = 'none'; // registration
     tabs[2].style.display = 'none'; // entry
     rankingTabs.forEach(i => { if (tabs[i]) tabs[i].style.display = ''; });
-    tabs[11].style.display = 'none'; // settings
+    tabs[12].style.display = 'none'; // settings
     document.getElementById('nav-tab-users').style.display = 'none';
     document.getElementById('landing-admin-cards').style.display = 'none';
   }
@@ -3043,6 +3043,41 @@ function init() {
   recalcAll();
   renderAll();
   initFirebase();
+  registerServiceWorker();
+  monitorOnlineStatus();
+}
+
+// ==================== SERVICE WORKER & OFFLINE ====================
+function registerServiceWorker() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js')
+      .then(registration => {
+        console.log('Service Worker registered:', registration);
+      })
+      .catch(err => {
+        console.log('Service Worker registration failed:', err);
+      });
+  }
+}
+
+function monitorOnlineStatus() {
+  function updateOnlineStatus() {
+    if (navigator.onLine) {
+      updateSyncStatus('live');
+      console.log('Online - Firestore will sync automatically');
+    } else {
+      updateSyncStatus('offline');
+      console.log('Offline - Changes saved locally and will sync when online');
+    }
+  }
+
+  window.addEventListener('online', updateOnlineStatus);
+  window.addEventListener('offline', updateOnlineStatus);
+
+  // Initial check
+  if (!navigator.onLine) {
+    updateSyncStatus('offline');
+  }
 }
 
 init();
