@@ -806,9 +806,6 @@ td .action-btns { display: flex; gap: 0.3rem; justify-content: center; }
     <div class="toolbar no-print">
       <button class="btn btn-accent" onclick="printRankings()">Print / PDF</button>
       <button class="btn btn-primary" onclick="printAllCategoryRankings()">Print All Categories</button>
-      <div class="toolbar-right">
-        <button class="btn btn-success" onclick="exportQualifiers()">Export Qualifiers (Excel)</button>
-      </div>
     </div>
 
     <div class="table-wrap">
@@ -1051,6 +1048,7 @@ td .action-btns { display: flex; gap: 0.3rem; justify-content: center; }
           <button class="btn btn-accent" onclick="exportAllData()">Export All Data (JSON)</button>
           <button class="btn btn-primary" onclick="document.getElementById('json-import').click()">Import Data (JSON)</button>
           <input type="file" id="json-import" accept=".json" style="display:none" onchange="importJSON(event)">
+          <button class="btn btn-danger" onclick="confirmAction('Archive current entries and clear all data? An archive file will be downloaded first.', archiveAndClearAll)">Archive & Clear All Entries</button>
           <button class="btn btn-danger" onclick="confirmAction('Reset ALL data and settings? This cannot be undone.', resetAll)">Reset Everything</button>
         </div>
       </div>
@@ -1629,8 +1627,16 @@ function saveAllRegistrations() {
 }
 
 function clearRegistrations() {
+  if (!requireRole('admin')) return;
+  // Clear the UI
   document.getElementById('reg-body').innerHTML = '';
   document.getElementById('reg-empty').style.display = '';
+
+  // Actually delete all entries from memory and Firestore
+  entries = [];
+  saveEntries();
+  firestoreClearAllEntries();
+  renderAll();
 }
 
 function renderRegTable() {
@@ -2372,6 +2378,35 @@ function importJSON(event) {
   };
   reader.readAsText(file);
   event.target.value = '';
+}
+
+function archiveAndClearAll() {
+  if (!requireRole('admin')) return;
+
+  // First, export current data as an archive
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+  const data = {
+    archivedDate: new Date().toISOString(),
+    settings: { CATEGORIES, SECTIONS, NUM_JUDGES, OUTLIER_THRESHOLD, POINTS_MAP, TOP_N, APP_TITLE, APP_SUBTITLE },
+    entries
+  };
+
+  // Compress by removing unnecessary whitespace
+  const jsonStr = JSON.stringify(data);
+  const blob = new Blob([jsonStr], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `ksef_archive_${timestamp}.json`;
+  a.click();
+
+  // Wait a moment for download to start, then clear all entries
+  setTimeout(() => {
+    entries = [];
+    saveEntries();
+    firestoreClearAllEntries();
+    renderAll();
+    alert(`Archive saved as ksef_archive_${timestamp}.json\n\nAll entries have been cleared. Settings were preserved.`);
+  }, 500);
 }
 
 function resetAll() {
