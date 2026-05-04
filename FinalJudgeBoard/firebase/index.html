@@ -1237,6 +1237,7 @@ function setupFirestoreListeners() {
     fromFirestore = true;
     const s = doc.data();
     CATEGORIES = s.categories || [...DEFAULT_CATEGORIES];
+    JUNIOR_CATEGORIES = s.juniorCategories || [...DEFAULT_JUNIOR_CATEGORIES];
     SECTIONS = s.sections || JSON.parse(JSON.stringify(DEFAULT_SECTIONS));
     NUM_JUDGES = s.numJudges || 3;
     OUTLIER_THRESHOLD = s.outlierThreshold || 5;
@@ -1254,6 +1255,7 @@ function setupFirestoreListeners() {
 
 function cacheSettingsToLocal() {
   localStorage.setItem('ps_categories', JSON.stringify(CATEGORIES));
+  localStorage.setItem('ps_junior_categories', JSON.stringify(JUNIOR_CATEGORIES));
   localStorage.setItem('ps_sections', JSON.stringify(SECTIONS));
   localStorage.setItem('ps_num_judges', NUM_JUDGES);
   localStorage.setItem('ps_outlier', OUTLIER_THRESHOLD);
@@ -1315,6 +1317,7 @@ function firestoreSaveSettings() {
   if (!db || fromFirestore) return;
   db.collection('config').doc('settings').set({
     categories: CATEGORIES,
+    juniorCategories: JUNIOR_CATEGORIES,
     sections: SECTIONS,
     numJudges: NUM_JUDGES,
     outlierThreshold: OUTLIER_THRESHOLD,
@@ -1373,6 +1376,7 @@ let selectedSections = ['A']; // Support multiple section selection
 function loadSettings() {
   try {
     CATEGORIES = JSON.parse(localStorage.getItem('ps_categories')) || [...DEFAULT_CATEGORIES];
+    JUNIOR_CATEGORIES = JSON.parse(localStorage.getItem('ps_junior_categories')) || [...DEFAULT_JUNIOR_CATEGORIES];
     SECTIONS = JSON.parse(localStorage.getItem('ps_sections')) || JSON.parse(JSON.stringify(DEFAULT_SECTIONS));
     NUM_JUDGES = parseInt(localStorage.getItem('ps_num_judges')) || 3;
     OUTLIER_THRESHOLD = parseInt(localStorage.getItem('ps_outlier')) || 5;
@@ -1421,6 +1425,7 @@ function resetSettings() {
   if (!requireRole('admin')) return;
   if (!confirm('Reset all settings to defaults?')) return;
   CATEGORIES = [...DEFAULT_CATEGORIES];
+  JUNIOR_CATEGORIES = [...DEFAULT_JUNIOR_CATEGORIES];
   SECTIONS = JSON.parse(JSON.stringify(DEFAULT_SECTIONS));
   NUM_JUDGES = 3;
   OUTLIER_THRESHOLD = 5;
@@ -1429,6 +1434,7 @@ function resetSettings() {
   APP_TITLE = DEFAULT_TITLE;
   APP_SUBTITLE = DEFAULT_SUBTITLE;
   localStorage.removeItem('ps_categories');
+  localStorage.removeItem('ps_junior_categories');
   localStorage.removeItem('ps_sections');
   localStorage.removeItem('ps_num_judges');
   localStorage.removeItem('ps_outlier');
@@ -1469,6 +1475,12 @@ function renderSettingsUI() {
     catList.innerHTML += `<li>${c} <button class="btn btn-sm btn-danger" onclick="removeCategory(${i})">x</button></li>`;
   });
 
+  const juniorCatList = document.getElementById('set-junior-cat-list');
+  juniorCatList.innerHTML = '';
+  JUNIOR_CATEGORIES.forEach((c, i) => {
+    juniorCatList.innerHTML += `<li>${c} <button class="btn btn-sm btn-danger" onclick="removeJuniorCategory(${i})">x</button></li>`;
+  });
+
   const ptList = document.getElementById('set-points-list');
   ptList.innerHTML = '';
   const sortedKeys = Object.keys(POINTS_MAP).map(Number).sort((a, b) => a - b);
@@ -1489,6 +1501,20 @@ function addCategory() {
 
 function removeCategory(i) {
   CATEGORIES.splice(i, 1);
+  renderSettingsUI();
+}
+
+function addJuniorCategory() {
+  const input = document.getElementById('set-junior-cat-new');
+  const val = input.value.trim().toUpperCase();
+  if (!val || JUNIOR_CATEGORIES.includes(val)) return;
+  JUNIOR_CATEGORIES.push(val);
+  input.value = '';
+  renderSettingsUI();
+}
+
+function removeJuniorCategory(i) {
+  JUNIOR_CATEGORIES.splice(i, 1);
   renderSettingsUI();
 }
 
@@ -1946,6 +1972,13 @@ function populateFilters() {
     CATEGORIES.map(c => `<option value="${c}">${c}</option>`).join('');
   document.getElementById('entry-cat-filter').innerHTML = catOptions;
   document.getElementById('rank-cat-filter').innerHTML = catOptions;
+
+  // Populate junior filter
+  const juniorCatOptions = '<option value="__all__">All Junior Categories</option>' +
+    JUNIOR_CATEGORIES.map(c => `<option value="${c}">${c}</option>`).join('');
+  if (document.getElementById('junior-cat-filter')) {
+    document.getElementById('junior-cat-filter').innerHTML = juniorCatOptions;
+  }
 }
 
 // ==================== DATA ENTRY TABLE ====================
@@ -2342,6 +2375,154 @@ function renderSchoolTypeRanking(type, prefix) {
   );
   const subtitleEl = document.getElementById(prefix + '-print-subtitle');
   if (subtitleEl) subtitleEl.textContent = type + ' Schools Ranking';
+}
+
+// ==================== JUNIOR RANKINGS ====================
+function renderJuniorRankings() {
+  const catFilter = document.getElementById('junior-cat-filter').value;
+  const showSections = document.getElementById('junior-show-sections').checked;
+
+  recalcAll();
+
+  // Filter for junior categories only
+  let filtered = entries.filter(e => {
+    const isJunior = JUNIOR_CATEGORIES.includes(e.category);
+    return isJunior && e.average > 0;
+  });
+
+  if (catFilter !== '__all__') {
+    filtered = filtered.filter(e => e.category === catFilter);
+  }
+
+  if (catFilter === '__all__') {
+    filtered.sort((a, b) => {
+      if (a.category !== b.category) return a.category.localeCompare(b.category);
+      return a.position - b.position;
+    });
+  } else {
+    filtered.sort((a, b) => a.position - b.position);
+  }
+
+  const thead = document.getElementById('junior-thead');
+  const tbody = document.getElementById('junior-body');
+  const empty = document.getElementById('junior-empty');
+
+  let hdr1 = '<tr><th rowspan="2">PSN</th><th rowspan="2">Sub-County</th>';
+  if (catFilter === '__all__') hdr1 += '<th rowspan="2">Category</th>';
+  hdr1 += '<th rowspan="2">Presenter(s)</th><th rowspan="2">School</th><th rowspan="2">Project</th>';
+
+  let hdr2 = '<tr>';
+
+  if (showSections) {
+    for (let j = 1; j <= NUM_JUDGES; j++) {
+      hdr1 += `<th colspan="${SECTIONS.length + 1}">J${j}</th>`;
+      SECTIONS.forEach(s => { hdr2 += `<th class="sub-header">${s.key}</th>`; });
+      hdr2 += `<th class="sub-header">Total</th>`;
+    }
+    hdr1 += '<th rowspan="2">AVG</th><th rowspan="2">PTS</th></tr>';
+    thead.innerHTML = hdr1 + hdr2 + '</tr>';
+  } else {
+    for (let j = 1; j <= NUM_JUDGES; j++) {
+      hdr1 += `<th>J${j}</th>`;
+    }
+    hdr1 += '<th>AVG</th><th>PTS</th></tr>';
+    thead.innerHTML = hdr1;
+  }
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = '';
+  let lastCat = '';
+  filtered.forEach(entry => {
+    if (catFilter === '__all__' && entry.category !== lastCat) {
+      lastCat = entry.category;
+      const colSpan = showSections ? 6 + NUM_JUDGES * (SECTIONS.length + 1) + 2 + 1 : 6 + NUM_JUDGES + 3;
+      const sepTr = document.createElement('tr');
+      sepTr.innerHTML = `<td colspan="${colSpan}" style="background:var(--primary);color:white;font-weight:700;text-align:left;padding:0.5rem;">${esc(entry.category)}</td>`;
+      tbody.appendChild(sepTr);
+    }
+
+    const presenters = entry.presenter1 + (entry.presenter2 ? ' & ' + entry.presenter2 : '');
+    const psnClass = entry.position <= 3 ? `psn-${entry.position}` : 'psn-other';
+
+    let row = `<td><span class="psn-badge ${psnClass}">${entry.position}</span></td>`;
+    row += `<td class="name-cell">${esc(entry.subcounty)}</td>`;
+    if (catFilter === '__all__') row += `<td>${esc(entry.category)}</td>`;
+    row += `<td class="name-cell">${esc(presenters)}</td>`;
+    row += `<td class="school-cell">${esc(entry.school)}</td>`;
+    row += `<td style="text-align:left;">${esc(entry.projectTitle)}</td>`;
+
+    if (showSections) {
+      for (let j = 1; j <= NUM_JUDGES; j++) {
+        const jk = 'j' + j;
+        SECTIONS.forEach(s => {
+          const val = entry.scores[jk]?.[s.key];
+          row += `<td>${val != null ? val : '-'}</td>`;
+        });
+        const jt = entry.judgeTotals[jk];
+        const isOutlier = entry.outlierJudge === jk;
+        row += `<td class="total-cell ${isOutlier ? 'outlier-score' : ''}">${jt != null ? jt.toFixed(1) : '-'}</td>`;
+      }
+    } else {
+      for (let j = 1; j <= NUM_JUDGES; j++) {
+        const jk = 'j' + j;
+        const jt = entry.judgeTotals[jk];
+        const isOutlier = entry.outlierJudge === jk;
+        row += `<td class="${isOutlier ? 'outlier-score' : ''}">${jt != null ? jt.toFixed(1) : '-'}</td>`;
+      }
+    }
+
+    const avgClass = entry.position <= 3 ? 'score-high' : '';
+    row += `<td class="total-cell ${avgClass}">${entry.average.toFixed(4)}</td>`;
+    row += `<td>${entry.points}</td>`;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = row;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('junior-print-title').textContent = APP_TITLE;
+  document.getElementById('junior-print-subtitle').textContent = (catFilter !== '__all__' ? catFilter + ' — ' : '') + 'Junior Rankings';
+}
+
+function printJuniorRankings() {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('print-active'));
+  document.getElementById('tab-junior-rankings').classList.add('print-active');
+  window.print();
+}
+
+function printAllJuniorCategoryRankings() {
+  const select = document.getElementById('junior-cat-filter');
+  const originalVal = select.value;
+
+  const container = document.createElement('div');
+  container.id = 'print-all-junior-container';
+  container.style.display = 'none';
+  document.body.appendChild(container);
+
+  JUNIOR_CATEGORIES.forEach(cat => {
+    select.value = cat;
+    renderJuniorRankings();
+    const section = document.getElementById('tab-junior-rankings');
+    const clone = section.cloneNode(true);
+    clone.style.display = 'block';
+    clone.classList.add('print-active');
+    container.appendChild(clone);
+  });
+
+  select.value = originalVal;
+  renderJuniorRankings();
+
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('print-active'));
+  container.style.display = 'block';
+  container.querySelectorAll('.section').forEach(s => { s.style.display = 'block'; s.classList.add('print-active'); });
+  window.print();
+  container.remove();
 }
 
 // ==================== PRINTING ====================
